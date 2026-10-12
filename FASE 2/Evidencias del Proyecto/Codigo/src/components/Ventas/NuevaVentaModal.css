@@ -1,8 +1,0 @@
-.stepper{display:flex; align-items:center; gap:10px;}
-.stepper button{
-  width:30px; height:30px; border-radius:8px; border:1px solid var(--line);
-  background:var(--surface-alt); font-size:16px; font-weight:700; cursor:pointer; color:var(--ink);
-}
-.stepper .n{min-width:26px; text-align:center; font-weight:700; font-family:'Sora',sans-serif;}
-.cart-item{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line);}
-.cart-item:last-child{border-bottom:none;}

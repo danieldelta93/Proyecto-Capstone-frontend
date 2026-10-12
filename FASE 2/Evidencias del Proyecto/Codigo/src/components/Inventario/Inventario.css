@@ -1,7 +1,0 @@
-.searchbar{
-  display:flex; align-items:center; gap:8px;
-  background:var(--surface); border:1px solid var(--line);
-  border-radius:12px; padding:9px 12px; margin-bottom:14px;
-}
-.searchbar input{border:none; padding:0; flex:1;}
-.searchbar input:focus{box-shadow:none;}
