@@ -1,0 +1,25 @@
+.shell{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100%;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+@media (min-width:520px){
+  body{ background: var(--surface-alt); }
+  .shell{
+    margin:24px auto;
+    min-height:calc(100vh - 48px);
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(20,30,26,0.18);
+    border:1px solid var(--line);
+  }
+}
+main{
+  flex:1;
+  padding:16px 16px 90px;
+  overflow-y:auto;
+}

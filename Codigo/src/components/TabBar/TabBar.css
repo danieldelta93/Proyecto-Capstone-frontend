@@ -1,0 +1,14 @@
+nav.tabbar{
+  position:sticky; bottom:0; left:0; right:0;
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  display:flex;
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));
+  z-index:10;
+}
+nav.tabbar button{
+  flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:5px 2px; cursor:pointer; color:var(--ink-soft); font-family:'Sora',sans-serif;
+}
+nav.tabbar button.active{color:var(--primary);}
+nav.tabbar span.tlabel{font-size:10px; font-weight:600;}

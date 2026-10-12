@@ -1,0 +1,136 @@
+/*
+ * Reset + "kit" de piezas de UI reutilizables (botones, inputs,
+ * tarjetas, badges, modal, tabs, estados vacíos, tipografía).
+ *
+ * Esto NO es "el CSS de la app" — cada componente tiene su propio
+ * archivo .css junto a su .jsx con SUS estilos particulares (ver
+ * src/components/*). Lo de aquí son piezas genéricas que varios
+ * componentes distintos comparten tal cual (un botón se ve igual
+ * en Inventario, Ventas o el Login), así que vive en un solo lugar
+ * en vez de copiarse y pegarse en cada carpeta.
+ */
+
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+html,body,#root{height:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Work Sans', system-ui, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+h1,h2,h3,.num,button{ font-family:'Sora', system-ui, sans-serif; }
+::-webkit-scrollbar{width:0; height:0;}
+
+/* Texto de encabezado de pantalla, reutilizado por las 5 secciones */
+.screen-title{font-size:20px; font-weight:700; margin:2px 0 3px;}
+.screen-sub{font-size:13px; color:var(--ink-soft); margin:0 0 16px;}
+
+/* Tarjeta genérica */
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+
+/* Botones */
+.btn{
+  font-family:'Sora',sans-serif;
+  border:none;
+  border-radius:12px;
+  padding:11px 16px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  transition:transform .08s ease, opacity .15s ease;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--primary); color:#fff;}
+.btn-accent{background:var(--accent); color:#3A2A05;}
+.btn-ghost{background:var(--surface-alt); color:var(--ink);}
+.btn-danger{background:var(--danger-tint); color:var(--danger);}
+.btn-block{width:100%;}
+.btn-sm{padding:7px 10px; font-size:12.5px; border-radius:9px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.icon-btn{
+  background:var(--surface-alt); border:none; border-radius:9px; width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-soft);
+}
+
+/* Campos de formulario */
+input, select, textarea{
+  width:100%;
+  font-family:'Work Sans',sans-serif;
+  font-size:14.5px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--ink);
+  outline:none;
+}
+input:focus, select:focus, textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-tint); }
+label.field{display:block; font-size:12.5px; color:var(--ink-soft); margin-bottom:5px; font-weight:600;}
+.field-wrap{margin-bottom:12px;}
+
+/* Badges de estado */
+.badge{
+  display:inline-block; font-size:11px; font-weight:700; padding:3px 8px; border-radius:99px;
+}
+.badge-ok{background:var(--primary-tint); color:var(--primary-dark);}
+.badge-low{background:var(--accent-tint); color:#8A5A00;}
+.badge-crit{background:var(--danger-tint); color:var(--danger);}
+
+/* Fila de lista tipo "producto" (la reutilizan Inventario y Ventas) */
+.prod-row{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 4px; border-bottom:1px solid var(--line);
+}
+.prod-row:last-child{border-bottom:none;}
+.prod-swatch{
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--primary-tint); color:var(--primary-dark); font-weight:700; font-size:15px;
+}
+.prod-main{flex:1; min-width:0;}
+.prod-name{font-weight:600; font-size:14.5px; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.prod-meta{font-size:12px; color:var(--ink-soft); margin:0;}
+.prod-right{text-align:right; flex-shrink:0;}
+.prod-price{font-weight:700; font-size:14px; margin:0 0 4px; font-family:'Sora',sans-serif;}
+.row-actions{display:flex; gap:6px; margin-left:4px;}
+
+/* Modal genérico (lo usan los formularios de producto y de venta) */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(20,30,26,0.45);
+  display:flex; align-items:flex-end; justify-content:center; z-index:50;
+}
+@media (min-width:520px){ .modal-backdrop{ align-items:center; } }
+.modal{
+  background:var(--surface); width:100%; max-width:460px;
+  border-radius:20px 20px 0 0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));
+  max-height:88vh; overflow-y:auto;
+}
+@media (min-width:520px){ .modal{ border-radius:18px; } }
+.modal h3{margin:0 0 14px; font-size:17px;}
+.modal-close-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+
+/* Toggle de pestañas (lo usan el Login y el Panel) */
+.tabs-toggle{display:flex; background:var(--surface-alt); border-radius:11px; padding:3px; gap:3px; margin-bottom:14px;}
+.tabs-toggle button{
+  flex:1; border:none; background:transparent; padding:8px 6px; border-radius:9px;
+  font-family:'Sora',sans-serif; font-weight:600; font-size:12.5px; color:var(--ink-soft); cursor:pointer;
+}
+.tabs-toggle button.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow);}
+
+/* Estado vacío genérico */
+.empty{text-align:center; padding:30px 10px; color:var(--ink-soft); font-size:13.5px;}
