@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
 
-export default function Login({ onLogin, onRegister, onLoginDemo, error }) {
+export default function Login({ onLogin, onRegister, error }) {
   const [modo, setModo] = useState("login"); // "login" | "registro"
   const [form, setForm] = useState({
     correo: "",
@@ -91,12 +91,6 @@ export default function Login({ onLogin, onRegister, onLoginDemo, error }) {
             {modo === "login" ? "Entrar" : "Crear mi cuenta"}
           </button>
         </form>
-
-        <div className="auth-divider"><span>o</span></div>
-
-        <button className="btn btn-ghost btn-block" onClick={onLoginDemo}>
-          👀 Probar con cuenta demo
-        </button>
       </div>
     </div>
   );

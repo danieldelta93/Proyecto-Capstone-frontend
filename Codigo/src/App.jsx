@@ -3,14 +3,13 @@ import Login from "./components/Auth/Login.jsx";
 import MainApp from "./MainApp.jsx";
 
 export default function App() {
-  const { user, login, register, loginDemo, logout, error } = useAuth();
+  const { user, login, register, logout, error } = useAuth();
 
   if (!user) {
     return (
       <Login
         onLogin={login}
         onRegister={register}
-        onLoginDemo={loginDemo}
         error={error}
       />
     );

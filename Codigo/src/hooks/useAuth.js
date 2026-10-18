@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Autenticación local para el prototipo: las cuentas y contraseñas
 // se guardan en el localStorage del navegador, en texto plano.
 // Esto alcanza para que cada persona vea SUS propios datos en este
-// dispositivo y para hacer la demo del proyecto, pero no reemplaza
+// dispositivo y para presentar el proyecto, pero no reemplaza
 // un backend real: para producción, las contraseñas deben viajar y
 // guardarse con hash (bcrypt, por ejemplo) en un servidor, no en el
 // navegador.
@@ -19,8 +19,7 @@ function readUsers() {
     // Ignora registros viejos/corruptos (por ejemplo, cuentas guardadas
     // por una versión anterior de Vendix que usaba "usuario" en vez de
     // "correo"). Sin este filtro, un registro así rompe el login de
-    // cualquier cuenta, incluida la demo, con un error de "toLowerCase
-    // of undefined".
+    // cualquier cuenta con un error de "toLowerCase of undefined".
     return users.filter((u) => u && typeof u.correo === "string" && u.correo);
   } catch (e) {
     console.warn("No se pudo leer usuarios de Vendix", e);
@@ -42,27 +41,30 @@ export function dataKeyFor(correo, sufijo) {
   return `vendix_data_${correo}_${sufijo}`;
 }
 
-// Crea la cuenta demo la primera vez que se abre la app, para que
-// siempre haya una forma de probar Vendix sin tener que registrarse.
-export const DEMO_EMAIL = "demo@vendix.cl";
-const DEMO_PASSWORD = "demo123";
+// Versiones anteriores de Vendix creaban una cuenta demo automáticamente.
+// Ya no existe: al abrir la app se borra esa cuenta (y sus datos de ejemplo)
+// si había quedado guardada en este navegador.
+const LEGACY_DEMO_EMAIL = "demo@vendix.cl";
 
-function seedDemoUserIfNeeded() {
-  const users = readUsers();
-  if (users.some((u) => u.correo === DEMO_EMAIL)) return;
-  writeUsers([
-    ...users,
-    {
-      correo: DEMO_EMAIL,
-      password: DEMO_PASSWORD,
-      nombreNegocio: "Puesto Doña Carmen",
-      nombreDueño: "Carmen",
-    },
-  ]);
+function purgeLegacyDemo() {
+  try {
+    const users = readUsers();
+    if (users.some((u) => u.correo === LEGACY_DEMO_EMAIL)) {
+      writeUsers(users.filter((u) => u.correo !== LEGACY_DEMO_EMAIL));
+    }
+    localStorage.removeItem(dataKeyFor(LEGACY_DEMO_EMAIL, "productos"));
+    localStorage.removeItem(dataKeyFor(LEGACY_DEMO_EMAIL, "ventas"));
+    if (localStorage.getItem(SESSION_KEY) === LEGACY_DEMO_EMAIL) {
+      localStorage.removeItem(SESSION_KEY);
+    }
+  } catch (e) {
+    console.warn("No se pudo limpiar la cuenta demo antigua", e);
+  }
 }
 
 export function useAuth() {
   const [session, setSession] = useState(() => {
+    purgeLegacyDemo();
     try {
       return localStorage.getItem(SESSION_KEY) || null;
     } catch {
@@ -70,10 +72,6 @@ export function useAuth() {
     }
   });
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    seedDemoUserIfNeeded();
-  }, []);
 
   const user = session
     ? readUsers().find((u) => u.correo === session) || null
@@ -123,12 +121,10 @@ export function useAuth() {
     return true;
   };
 
-  const loginDemo = () => login({ correo: DEMO_EMAIL, password: DEMO_PASSWORD });
-
   const logout = () => {
     localStorage.removeItem(SESSION_KEY);
     setSession(null);
   };
 
-  return { user, login, register, loginDemo, logout, error, setError };
+  return { user, login, register, logout, error, setError };
 }

@@ -1,4 +1,5 @@
 import { fmtCLP, daysAgoISO, DIAS } from "../../utils/format.js";
+import { finanzasDeVentas, costoDeItem } from "../../utils/finanzas.js";
 
 export function responderAsistente(pregunta, productos, ventas) {
   const q = pregunta.toLowerCase();
@@ -10,6 +11,32 @@ export function responderAsistente(pregunta, productos, ventas) {
       cantidadPorProducto[it.productoId] = (cantidadPorProducto[it.productoId] || 0) + it.cantidad;
     })
   );
+
+  // Preguntas sobre ganancia e inversión (van primero porque contienen "semana", "producto", etc.)
+  if (q.includes("más ganancia") || q.includes("mas ganancia") || (q.includes("producto") && q.includes("ganancia"))) {
+    const porProducto = {};
+    ventas.forEach((v) =>
+      v.items.forEach((it) => {
+        const costo = costoDeItem(it, productos);
+        if (costo === null) return;
+        porProducto[it.productoId] = (porProducto[it.productoId] || 0) + it.cantidad * (it.precioUnit - costo);
+      })
+    );
+    const mejor = Object.entries(porProducto).sort((a, b) => b[1] - a[1])[0];
+    if (!mejor) return "Todavía no puedo calcularlo: agrega el precio de compra a tus productos y registra ventas.";
+    const p = productos.find((p) => p.id === Number(mejor[0]));
+    return `El producto que más ganancia te ha dejado es "${p ? p.nombre : "desconocido"}": ${fmtCLP(mejor[1])} en total.`;
+  }
+
+  if (q.includes("gané") || q.includes("gane") || q.includes("ganancia") || q.includes("invert")) {
+    const f = finanzasDeVentas(ventasUlt7, productos);
+    if (f.ingresos === 0)
+      return "Todavía no puedo calcularlo: agrega el precio de compra a tus productos y registra ventas, y te digo cuánto inviertes y cuánto ganas.";
+    const aviso = f.ventasSinCosto
+      ? ` Ojo: no conté ${f.ventasSinCosto} venta${f.ventasSinCosto === 1 ? "" : "s"} porque algún producto no tiene precio de compra.`
+      : "";
+    return `En los últimos 7 días invertiste ${fmtCLP(f.invertido)} en la mercadería que vendiste y ganaste ${fmtCLP(f.ganancia)} (margen de ${f.margen.toFixed(0)}%).${aviso}`;
+  }
 
   if (q.includes("comprar") || q.includes("reponer") || q.includes("restock")) {
     const candidatos = productos

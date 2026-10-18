@@ -9,21 +9,13 @@ import Asistente from "./components/Asistente/Asistente.jsx";
 import Reportes from "./components/Reportes/Reportes.jsx";
 import { useLocalStorage } from "./hooks/useLocalStorage.js";
 import { useToast } from "./hooks/useToast.js";
-import { dataKeyFor, DEMO_EMAIL } from "./hooks/useAuth.js";
-import { initialProducts, initialSales } from "./data/mockData.js";
-import { daysAgoISO } from "./utils/format.js";
+import { dataKeyFor } from "./hooks/useAuth.js";
+import { daysAgoISO, fmtCLP } from "./utils/format.js";
 import "./MainApp.css";
 
 export default function MainApp({ user, onLogout }) {
-  const isDemo = user.correo === DEMO_EMAIL;
-  const [productos, setProductos] = useLocalStorage(
-    dataKeyFor(user.correo, "productos"),
-    isDemo ? initialProducts : []
-  );
-  const [ventas, setVentas] = useLocalStorage(
-    dataKeyFor(user.correo, "ventas"),
-    isDemo ? initialSales : []
-  );
+  const [productos, setProductos] = useLocalStorage(dataKeyFor(user.correo, "productos"), []);
+  const [ventas, setVentas] = useLocalStorage(dataKeyFor(user.correo, "ventas"), []);
   const [tab, setTab] = useState("inventario");
   const { toast, showToast } = useToast();
 
@@ -49,7 +41,11 @@ export default function MainApp({ user, onLogout }) {
         return item ? { ...p, stock: Math.max(0, p.stock - item.cantidad) } : p;
       })
     );
-    showToast(`¡Venta registrada! 🎉 Sumaste $${total.toLocaleString("es-CL")}`);
+    const todoConCosto = items.every((it) => typeof it.costoUnit === "number");
+    const ganancia = items.reduce((a, it) => a + it.cantidad * (it.precioUnit - (it.costoUnit ?? it.precioUnit)), 0);
+    showToast(
+      `¡Venta registrada! 🎉 Sumaste ${fmtCLP(total)}` + (todoConCosto ? ` (ganancia ${fmtCLP(ganancia)})` : "")
+    );
   };
 
   const agregarProductoConAviso = (data) => {
@@ -63,14 +59,11 @@ export default function MainApp({ user, onLogout }) {
     }
   };
 
-  const resetDemo = () => {
-    const mensaje = isDemo
-      ? "¿Restablecer los datos de ejemplo? Se perderán los cambios que hiciste."
-      : "¿Borrar todos tus productos y ventas? Esta acción no se puede deshacer.";
-    if (confirm(mensaje)) {
-      setProductos(isDemo ? initialProducts : []);
-      setVentas(isDemo ? initialSales : []);
-      showToast("Listo, datos restablecidos 🧹");
+  const borrarDatos = () => {
+    if (confirm("¿Borrar todos tus productos y ventas? Esta acción no se puede deshacer.")) {
+      setProductos([]);
+      setVentas([]);
+      showToast("Listo, tus datos fueron borrados 🧹");
     }
   };
 
@@ -79,7 +72,7 @@ export default function MainApp({ user, onLogout }) {
     ventas: <Ventas productos={productos} ventas={ventas} onRegistrarVenta={registrarVentaConAviso} />,
     panel: <Panel productos={productos} ventas={ventas} />,
     asistente: <Asistente productos={productos} ventas={ventas} />,
-    reportes: <Reportes productos={productos} ventas={ventas} onReset={resetDemo} isDemo={isDemo} />,
+    reportes: <Reportes productos={productos} ventas={ventas} onReset={borrarDatos} />,
   };
 
   return (

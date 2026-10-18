@@ -1,4 +1,4 @@
-export const fmtCLP = (n) => "$" + Math.round(n).toLocaleString("es-CL");
+export const fmtCLP = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("es-CL");
 
 export function daysAgoISO(n) {
   const d = new Date();
