@@ -166,3 +166,35 @@ export const IconAlert = (p) => (
     }
   />
 );
+
+export const IconList = (p) => (
+  <Icon
+    {...p}
+    size={16}
+    d={
+      <>
+        <path d="M8 6h13M8 12h13M8 18h13" />
+        <path d="M3 6h.01M3 12h.01M3 18h.01" />
+      </>
+    }
+  />
+);
+
+export const IconGrid = (p) => (
+  <Icon
+    {...p}
+    size={16}
+    d={
+      <>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </>
+    }
+  />
+);
+
+export const IconChevron = (p) => (
+  <Icon {...p} size={16} d={<path d="M6 9l6 6 6-6" />} />
+);

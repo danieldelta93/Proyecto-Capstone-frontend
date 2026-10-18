@@ -8,6 +8,7 @@ const SUGERIDAS = [
   "¿Cuál es mi mejor día de ventas?",
   "¿Qué productos tienen stock bajo?",
   "¿Cuánto vendí esta semana?",
+  "¿Cuánto gané esta semana?",
 ];
 
 export default function Asistente({ productos, ventas }) {

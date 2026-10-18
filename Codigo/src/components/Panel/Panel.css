@@ -9,3 +9,15 @@
 .alert-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);}
 .alert-row:last-child{border-bottom:none;}
 .dot{width:8px; height:8px; border-radius:50%; background:var(--danger); flex-shrink:0;}
+
+/* Inversión y ganancia */
+.chart-canvas-box.alto{height:230px;}
+.fin-kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:0 6px 12px;}
+.fin-kpi .label{font-size:11px; color:var(--ink-soft); margin:0 0 2px; display:flex; align-items:center; gap:5px;}
+.fin-kpi .valor{font-family:'Sora',sans-serif; font-weight:800; font-size:15px; margin:0;}
+.fin-kpi .valor.verde{color:var(--primary);}
+.fin-kpi .valor.neg{color:var(--danger);}
+.punto{display:inline-block; width:9px; height:9px; border-radius:3px;}
+.punto.gris{background:var(--ink-soft);}
+.punto.verde{background:var(--primary);}
+.fin-nota{font-size:11.5px; color:var(--ink-soft); margin:8px 6px 6px; line-height:1.4;}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import { fmtCLP, daysAgoISO } from "../../utils/format.js";
+import { finanzasDeVentas, valorInventario } from "../../utils/finanzas.js";
 import { IconAlert } from "../Icons/Icons.jsx";
 import "./Panel.css";
 
@@ -10,6 +11,8 @@ export default function Panel({ productos, ventas }) {
   const diasBarRef = useRef(null);
   const topBarChart = useRef(null);
   const diasBarChart = useRef(null);
+  const finBarRef = useRef(null);
+  const finBarChart = useRef(null);
 
   const dias = useMemo(() => {
     const arr = [];
@@ -40,18 +43,28 @@ export default function Panel({ productos, ventas }) {
     .sort((a, b) => b.cant - a.cant)
     .slice(0, 5);
 
+  // Inversión y ganancia del período (solo ítems con precio de compra conocido)
+  const fin = finanzasDeVentas(ventasEnRango, productos);
+  const finPorDia = dias.map((d) =>
+    finanzasDeVentas(ventasEnRango.filter((v) => v.fecha === d), productos)
+  );
+  const hayFin = fin.ingresos > 0;
+  const enMercaderia = valorInventario(productos);
+
   const productoEstrella = topProductos[0]?.producto?.nombre || "—";
   const stockBajo = productos.filter((p) => p.stock <= p.stockMin);
 
   useEffect(() => {
     if (topBarChart.current) topBarChart.current.destroy();
     if (diasBarChart.current) diasBarChart.current.destroy();
+    if (finBarChart.current) finBarChart.current.destroy();
 
     const styles = getComputedStyle(document.documentElement);
     const ink = styles.getPropertyValue("--ink").trim();
     const primary = styles.getPropertyValue("--primary").trim();
     const accent = styles.getPropertyValue("--accent").trim();
     const line = styles.getPropertyValue("--line").trim();
+    const inkSoft = styles.getPropertyValue("--ink-soft").trim();
 
     // Ventas por día: barras verticales, una por día del período.
     if (diasBarRef.current) {
@@ -72,6 +85,35 @@ export default function Panel({ productos, ventas }) {
           scales: {
             x: { grid: { display: false }, ticks: { color: ink, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } },
             y: { grid: { color: line }, ticks: { color: ink, font: { size: 10 } } },
+          },
+        },
+      });
+    }
+
+    // Inversión y ganancia: barras apiladas por día (invertido + ganancia = lo vendido).
+    if (finBarRef.current) {
+      const pesos = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("es-CL");
+      finBarChart.current = new Chart(finBarRef.current, {
+        type: "bar",
+        data: {
+          labels: dias.map((d) =>
+            new Date(d + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "short" })
+          ),
+          datasets: [
+            { label: "Invertido", data: finPorDia.map((f) => f.invertido), backgroundColor: inkSoft, maxBarThickness: 28 },
+            { label: "Ganancia", data: finPorDia.map((f) => f.ganancia), backgroundColor: primary, maxBarThickness: 28 },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: "bottom", labels: { color: ink, boxWidth: 12, font: { size: 11 } } },
+            tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${pesos(c.parsed.y)}` } },
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { color: ink, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } },
+            y: { stacked: true, grid: { color: line }, ticks: { color: ink, font: { size: 10 } } },
           },
         },
       });
@@ -103,9 +145,10 @@ export default function Panel({ productos, ventas }) {
     return () => {
       if (topBarChart.current) topBarChart.current.destroy();
       if (diasBarChart.current) diasBarChart.current.destroy();
+      if (finBarChart.current) finBarChart.current.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rango, JSON.stringify(porDia), JSON.stringify(topProductos.map((t) => t.cant))]);
+  }, [rango, JSON.stringify(porDia), JSON.stringify(topProductos.map((t) => t.cant)), JSON.stringify(finPorDia.map((f) => [f.invertido, f.ganancia]))]);
 
   return (
     <div>
@@ -144,6 +187,51 @@ export default function Panel({ productos, ventas }) {
         <div className="chart-canvas-box">
           <canvas ref={diasBarRef}></canvas>
         </div>
+      </div>
+
+      <div className="chart-wrap">
+        <h4>Inversión y ganancia</h4>
+        {hayFin ? (
+          <>
+            <div className="fin-kpis">
+              <div className="fin-kpi">
+                <p className="label">
+                  <i className="punto gris" /> Invertido
+                </p>
+                <p className="valor">{fmtCLP(fin.invertido)}</p>
+              </div>
+              <div className="fin-kpi">
+                <p className="label">
+                  <i className="punto verde" /> Ganancia
+                </p>
+                <p className={"valor" + (fin.ganancia < 0 ? " neg" : " verde")}>{fmtCLP(fin.ganancia)}</p>
+              </div>
+              <div className="fin-kpi">
+                <p className="label">Margen</p>
+                <p className="valor">{fin.margen.toFixed(0)}%</p>
+              </div>
+            </div>
+            <div className="chart-canvas-box alto">
+              <canvas ref={finBarRef}></canvas>
+            </div>
+            <p className="fin-nota">
+              Invertido es lo que te costaron los productos que vendiste en estos días; lo invertido más la ganancia
+              da el total vendido.
+              {fin.ventasSinCosto > 0 &&
+                ` No se cuentan ${fin.ventasSinCosto} venta${fin.ventasSinCosto === 1 ? "" : "s"} con productos sin precio de compra.`}
+            </p>
+          </>
+        ) : (
+          <p className="empty">
+            💰 Agrega el precio de compra a tus productos y registra ventas para ver cuánto inviertes y cuánto ganas.
+          </p>
+        )}
+        {enMercaderia.conCosto > 0 && enMercaderia.costo > 0 && (
+          <p className="fin-nota">
+            Hoy tienes {fmtCLP(enMercaderia.costo)} en mercadería (a precio de compra). Si la vendes toda, ganarías{" "}
+            {fmtCLP(enMercaderia.gananciaPotencial)}.
+          </p>
+        )}
       </div>
 
       <div className="chart-wrap">

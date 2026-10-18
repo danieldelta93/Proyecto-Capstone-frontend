@@ -25,12 +25,23 @@ export default function NuevaVentaModal({ productos, onClose, onConfirm }) {
     .map(([id, cantidad]) => {
       const p = productos.find((p) => p.id === Number(id));
       return p
-        ? { productoId: p.id, cantidad, precioUnit: p.precio, nombre: p.nombre, disponible: p.stock }
+        ? {
+            productoId: p.id,
+            cantidad,
+            precioUnit: p.precio,
+            costoUnit: typeof p.costo === "number" ? p.costo : null,
+            nombre: p.nombre,
+            disponible: p.stock,
+          }
         : null;
     })
     .filter(Boolean);
 
   const total = items.reduce((a, it) => a + it.cantidad * it.precioUnit, 0);
+  // ganancia estimada de esta venta (solo si todos los productos tienen precio de compra)
+  const gananciaEst = items.every((it) => it.costoUnit !== null)
+    ? items.reduce((a, it) => a + it.cantidad * (it.precioUnit - it.costoUnit), 0)
+    : null;
   const excedeStock = items.some((it) => it.cantidad > it.disponible);
   const puedeConfirmar = items.length > 0 && !excedeStock;
 
@@ -114,15 +125,22 @@ export default function NuevaVentaModal({ productos, onClose, onConfirm }) {
           </span>
         </div>
 
+        {items.length > 0 && gananciaEst !== null && (
+          <p className="ganancia-venta">
+            Ganancia estimada: <b>{fmtCLP(gananciaEst)}</b>
+          </p>
+        )}
+
         <button
           className="btn btn-primary btn-block"
           disabled={!puedeConfirmar}
           onClick={() =>
             onConfirm(
-              items.map(({ productoId, cantidad, precioUnit }) => ({
+              items.map(({ productoId, cantidad, precioUnit, costoUnit }) => ({
                 productoId,
                 cantidad,
                 precioUnit,
+                costoUnit,
               })),
               metodo
             )

@@ -8,10 +8,16 @@ Informática, Duoc UC Valparaíso.
 
 - **Login / cuentas**: cada persona crea su cuenta o inicia sesión, y
   ve solo sus propios productos y ventas.
-- **Inventario**: alta, edición y eliminación de productos (CRUD).
-- **Ventas**: registro de ventas con descuento automático de stock.
-- **Panel**: dashboards (Chart.js) de ventas por día, productos más
-  vendidos, ticket promedio y alertas de stock bajo.
+- **Inventario**: alta, edición y eliminación de productos (CRUD) con
+  precio de compra, precio de venta y ganancia por unidad, con
+  búsqueda, filtros por categoría y por stock bajo, orden, vista de lista
+  o de tarjetas y botón "Ver más" para inventarios grandes.
+- **Ventas**: registro de ventas con descuento automático de stock, resumen
+  del período, filtros por período y método de pago, e historial
+  agrupado por día.
+- **Panel**: dashboards (Chart.js) de ventas por día, **inversión y
+  ganancia**, productos más vendidos, ticket promedio y alertas de stock
+  bajo.
 - **Asistente**: chat que responde preguntas en lenguaje natural
   calculando sobre los datos de ventas e inventario.
 - **Reportes**: exportación a CSV (Excel) y a PDF (impresión).
@@ -23,24 +29,46 @@ cuenta (nombre del negocio, tu nombre, correo electrónico y
 contraseña). A partir de ahí, todo lo que agregues (productos, ventas)
 queda asociado a ese correo y separado de las demás cuentas.
 
-También hay un botón **"Probar con cuenta demo"** que entra
-directamente con datos de ejemplo ya cargados (correo
-`demo@vendix.cl`, contraseña `demo123`), útil para mostrar la app sin
-tener que registrarse primero.
+Cada cuenta nueva parte vacía: tú agregas tus propios productos y
+ventas. (Las versiones anteriores traían una cuenta demo con datos de
+ejemplo; ya no existe y, si había quedado guardada en tu navegador,
+Vendix la borra sola al abrir.)
 
 **Importante — esto es un prototipo, no un sistema de login real:**
 las cuentas y contraseñas se guardan en el `localStorage` del propio
 navegador, en texto plano, sin backend detrás. Sirve para que cada
-persona vea sus propios datos en este dispositivo y para la demo del
+persona vea sus propios datos en este dispositivo y para presentar el
 proyecto, pero **no** es seguro para producción. Para el sistema
 final se necesita un backend con autenticación real (contraseñas con
 hash, tokens de sesión, base de datos), como se define en el diseño
 de arquitectura del proyecto.
 
-Los datos son de ejemplo y se guardan en el `localStorage` del
+Los datos se guardan en el `localStorage` del
 navegador, así que los cambios persisten solo en tu equipo. Este
 prototipo es solo frontend: no hay backend ni base de datos real
 todavía (ver "Próximos pasos").
+
+## Precio de compra, precio de venta y ganancia
+
+Cada producto tiene un **precio de compra** (lo que te cuesta) y un
+**precio de venta** (lo que cobras). Ejemplo: compras a $3.000 y vendes a
+$5.000, entonces ganas $2.000 por unidad (margen de 40%). Al escribir los
+dos precios, el formulario muestra la ganancia al instante.
+
+- **Al vender**, cada ítem guarda el precio de compra de ese momento
+  (`costoUnit`), así la ganancia de una venta no cambia si después cambias
+  el costo del producto.
+- **Panel → "Inversión y ganancia"**: barras apiladas por día. *Invertido*
+  es lo que costó la mercadería vendida en el período; *invertido +
+  ganancia = total vendido*. También muestra el margen y cuánto dinero
+  tienes en mercadería (stock a precio de compra).
+- **Productos o ventas antiguas** (hechos antes de existir el precio de
+  compra): los productos muestran "Falta el precio de compra" hasta que los
+  edites. Las ventas antiguas usan el costo actual del producto; si el
+  producto no tiene costo, esa venta no entra en los cálculos y el Panel lo
+  avisa.
+- Los reportes CSV incluyen precio de compra, ganancia por unidad, invertido
+  y ganancia por venta, y el asistente responde "¿Cuánto gané esta semana?".
 
 ## Web y "app" instalable (PWA)
 
@@ -89,13 +117,13 @@ Esto solo pasa en el navegador donde la probaste; a cualquier otra
 persona que entre por primera vez le va a cargar siempre la versión
 actual.
 
-### "No puedo entrar, ni con la cuenta demo" (error de toLowerCase)
+### "No puedo entrar" (error de toLowerCase)
 
 Si en algún momento probaste una versión anterior de Vendix en ese
 mismo navegador (de cuando el login pedía "usuario" en vez de
 "correo"), puede haber quedado guardada una cuenta vieja e
 incompleta en el `localStorage`, y eso hacía fallar el login para
-todos, incluida la cuenta demo. Ya está arreglado: Vendix ahora
+todos. Ya está arreglado: Vendix ahora
 ignora automáticamente esas cuentas viejas e incompletas. Si de
 todas formas ves algo raro, puedes borrarlas a mano: DevTools →
 pestaña **Application** → **Local Storage** → tu sitio → elimina la
@@ -153,8 +181,8 @@ src/
   styles/
     variables.css             paleta de colores clara/oscura (única fuente)
     base.css                  reset + piezas de UI compartidas (botones, inputs, tarjetas...)
-  data/mockData.js            productos y ventas de ejemplo (cuenta demo)
   utils/format.js, csv.js     formato de moneda/fechas, export CSV
+  utils/finanzas.js           cálculos de inversión y ganancia
   hooks/
     useAuth.js                cuentas, login/registro, sesión activa
     useLocalStorage.js        persistencia en el navegador

@@ -1,0 +1,10 @@
+/* Cuadro que muestra cuánto ganas por unidad mientras escribes los precios */
+.ganancia-box{
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px;
+  background:var(--primary-tint); border-radius:12px;
+  padding:10px 12px; margin-bottom:12px; font-size:13px;
+}
+.ganancia-box b{font-family:'Sora',sans-serif; font-size:17px; color:var(--primary-dark);}
+.ganancia-box small{margin-left:auto; color:var(--ink-soft); font-size:12px;}
+.ganancia-box.neg{background:var(--danger-tint);}
+.ganancia-box.neg b{color:var(--danger);}
