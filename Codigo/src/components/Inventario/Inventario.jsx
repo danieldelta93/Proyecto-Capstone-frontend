@@ -48,7 +48,7 @@ function GananciaLinea({ producto }) {
   );
 }
 
-export default function Inventario({ productos, setProductos, onSave }) {
+export default function Inventario({ productos, onSave, onDelete }) {
   const [query, setQuery] = useState("");
   const [categoria, setCategoria] = useState("Todas");
   const [soloBajo, setSoloBajo] = useState(false);
@@ -88,14 +88,15 @@ export default function Inventario({ productos, setProductos, onSave }) {
   const mostrados = filtered.slice(0, visibles);
   const restantes = filtered.length - mostrados.length;
 
-  const handleSave = (data) => {
-    onSave(data);
-    setEditing(null);
+  // el formulario se cierra solo si el servidor guardó bien el producto
+  const handleSave = async (data) => {
+    const ok = await onSave(data);
+    if (ok) setEditing(null);
   };
 
   const handleDelete = (id) => {
-    if (confirm("¿Eliminar este producto del inventario?")) {
-      setProductos((list) => list.filter((p) => p.id !== id));
+    if (confirm("¿Eliminar este producto del inventario? Sus ventas anteriores se conservan.")) {
+      onDelete(id);
     }
   };
 

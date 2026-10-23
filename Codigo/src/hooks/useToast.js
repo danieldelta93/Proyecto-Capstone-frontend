@@ -8,7 +8,7 @@ export function useToast() {
 
   const showToast = useCallback((text, duracionMs = 2200) => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    setToast({ id: Date.now(), text });
+    setToast({ id: Date.now(), text, duracionMs });
     timerRef.current = setTimeout(() => setToast(null), duracionMs);
   }, []);
 

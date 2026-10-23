@@ -12,10 +12,14 @@ export default function Login({ onLogin, onRegister, error }) {
 
   const set = (campo) => (e) => setForm({ ...form, [campo]: e.target.value });
 
-  const submit = (e) => {
+  const [enviando, setEnviando] = useState(false);
+
+  const submit = async (e) => {
     e.preventDefault();
-    if (modo === "login") onLogin({ correo: form.correo, password: form.password });
-    else onRegister(form);
+    setEnviando(true);
+    if (modo === "login") await onLogin({ correo: form.correo, password: form.password });
+    else await onRegister(form);
+    setEnviando(false);
   };
 
   return (
@@ -87,8 +91,8 @@ export default function Login({ onLogin, onRegister, error }) {
 
           {error && <p className="auth-error">⚠️ {error}</p>}
 
-          <button className="btn btn-primary btn-block" type="submit" style={{ marginTop: 4 }}>
-            {modo === "login" ? "Entrar" : "Crear mi cuenta"}
+          <button className="btn btn-primary btn-block" type="submit" disabled={enviando} style={{ marginTop: 4 }}>
+            {enviando ? "Un momento…" : modo === "login" ? "Entrar" : "Crear mi cuenta"}
           </button>
         </form>
       </div>

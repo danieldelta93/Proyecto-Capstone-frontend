@@ -1,6 +1,6 @@
-# Vendix — Prototipo frontend
+# Vendix — Frontend
 
-Prototipo en React (Vite) del sistema de gestión de ventas e inventario
+Aplicación en React (Vite) del sistema de gestión de ventas e inventario
 para vendedores ambulantes y pymes — Proyecto APT, Ingeniería en
 Informática, Duoc UC Valparaíso.
 
@@ -13,40 +13,32 @@ Informática, Duoc UC Valparaíso.
   búsqueda, filtros por categoría y por stock bajo, orden, vista de lista
   o de tarjetas y botón "Ver más" para inventarios grandes.
 - **Ventas**: registro de ventas con descuento automático de stock, resumen
-  del período, filtros por período y método de pago, e historial
-  agrupado por día.
+  del período, filtros por período y método de pago, historial agrupado
+  por día y anulación de ventas (el stock vuelve al inventario).
 - **Panel**: dashboards (Chart.js) de ventas por día, **inversión y
   ganancia**, productos más vendidos, ticket promedio y alertas de stock
   bajo.
-- **Asistente**: chat que responde preguntas en lenguaje natural
-  calculando sobre los datos de ventas e inventario.
+- **Asistente**: chat que responde preguntas en lenguaje natural sobre tus
+  ventas e inventario (las respuestas las genera el backend).
 - **Reportes**: exportación a CSV (Excel) y a PDF (impresión).
 
-## Cuentas y datos por usuario
+## Conexión con el backend
 
-Al abrir Vendix por primera vez se pide iniciar sesión o crear una
-cuenta (nombre del negocio, tu nombre, correo electrónico y
-contraseña). A partir de ahí, todo lo que agregues (productos, ventas)
-queda asociado a ese correo y separado de las demás cuentas.
+Esta app **no guarda datos en el navegador**: todo (cuentas, productos, ventas, panel y asistente) se
+pide y se guarda en el backend (repo `Proyecto-Capstone-backend`: API REST con Node.js, Express y MySQL).
+Por eso necesitas tener el backend encendido para usarla.
 
-Cada cuenta nueva parte vacía: tú agregas tus propios productos y
-ventas. (Las versiones anteriores traían una cuenta demo con datos de
-ejemplo; ya no existe y, si había quedado guardada en tu navegador,
-Vendix la borra sola al abrir.)
-
-**Importante — esto es un prototipo, no un sistema de login real:**
-las cuentas y contraseñas se guardan en el `localStorage` del propio
-navegador, en texto plano, sin backend detrás. Sirve para que cada
-persona vea sus propios datos en este dispositivo y para presentar el
-proyecto, pero **no** es seguro para producción. Para el sistema
-final se necesita un backend con autenticación real (contraseñas con
-hash, tokens de sesión, base de datos), como se define en el diseño
-de arquitectura del proyecto.
-
-Los datos se guardan en el `localStorage` del
-navegador, así que los cambios persisten solo en tu equipo. Este
-prototipo es solo frontend: no hay backend ni base de datos real
-todavía (ver "Próximos pasos").
+- **Cuentas:** al registrarte o iniciar sesión, el backend entrega un token de sesión que se guarda en
+  este navegador (`vendix_token`). Las contraseñas nunca se guardan aquí. Si el token vence, la app vuelve
+  sola al login.
+- **Datos:** cada cuenta ve solo lo suyo y puede entrar desde cualquier dispositivo.
+- **Panel y asistente:** los números (ventas por día, inversión y ganancia, más vendidos, tendencia frente al
+  período anterior) los calcula el servidor con consultas SQL.
+- **Dirección de la API:** en desarrollo no hay que configurar nada, porque Vite reenvía `/api` a
+  `http://localhost:3000` (ver `vite.config.js`). Al publicar la app, define `VITE_API_URL` (ver `.env.example`).
+- **Sin internet:** la app instalable (PWA) abre sin conexión, pero necesita conexión con el servidor para
+  mostrar y guardar datos. Las respuestas de la API nunca se guardan en la caché del navegador.
+- Las ventas se piden al servidor hasta un máximo de 500 (las más recientes).
 
 ## Precio de compra, precio de venta y ganancia
 
@@ -117,29 +109,19 @@ Esto solo pasa en el navegador donde la probaste; a cualquier otra
 persona que entre por primera vez le va a cargar siempre la versión
 actual.
 
-### "No puedo entrar" (error de toLowerCase)
-
-Si en algún momento probaste una versión anterior de Vendix en ese
-mismo navegador (de cuando el login pedía "usuario" en vez de
-"correo"), puede haber quedado guardada una cuenta vieja e
-incompleta en el `localStorage`, y eso hacía fallar el login para
-todos. Ya está arreglado: Vendix ahora
-ignora automáticamente esas cuentas viejas e incompletas. Si de
-todas formas ves algo raro, puedes borrarlas a mano: DevTools →
-pestaña **Application** → **Local Storage** → tu sitio → elimina la
-entrada `vendix_users` → recarga la página.
-
 ## Cómo instalar y correr
 
-Necesitas [Node.js](https://nodejs.org/) 18 o superior instalado.
+Necesitas [Node.js](https://nodejs.org/) 18 o superior y **el backend encendido** (ver el README del
+repo del backend: MySQL + `npm run dev`).
+
+Con el backend corriendo en `http://localhost:3000`, en otra terminal:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre la URL que te muestre la terminal (normalmente
-`http://localhost:5173`).
+Abre la URL que te muestre la terminal (normalmente `http://localhost:5173`), crea tu cuenta y listo.
 
 Otros comandos:
 
@@ -147,6 +129,8 @@ Otros comandos:
 npm run build     # genera la versión de producción en /dist
 npm run preview   # sirve la carpeta /dist para probarla
 ```
+
+Si ves "No se pudo conectar con el servidor", el backend está apagado: enciéndelo y toca **Reintentar**.
 
 ## Organización del código: cada componente en su carpeta
 
@@ -177,6 +161,10 @@ componente y está en el `.css` de esa carpeta.
 src/
   main.jsx                    punto de entrada (importa variables.css y base.css)
   App.jsx                     decide si mostrar Login o la app principal
+  api/
+    cliente.js                envía las peticiones a la API (token, errores)
+    api.js                    una función por cada cosa que se pide al backend
+    mapeos.js                 traduce nombres de campos entre la API y la interfaz
   MainApp.jsx, MainApp.css    layout general (el "shell" de la app) y sesión activa
   styles/
     variables.css             paleta de colores clara/oscura (única fuente)
@@ -184,8 +172,7 @@ src/
   utils/format.js, csv.js     formato de moneda/fechas, export CSV
   utils/finanzas.js           cálculos de inversión y ganancia
   hooks/
-    useAuth.js                cuentas, login/registro, sesión activa
-    useLocalStorage.js        persistencia en el navegador
+    useAuth.js                login/registro, token y sesión activa (con el backend)
     useInstallPrompt.js       detecta si la app se puede instalar (PWA)
     useToast.js               avisos breves (venta registrada, etc.)
   components/
@@ -201,21 +188,13 @@ src/
       Ventas.jsx + .css
       NuevaVentaModal.jsx + .css
     Panel/Panel.jsx + .css
-    Asistente/
-      Asistente.jsx + .css
-      respuestas.js           (lógica del asistente, sin JSX)
+    Asistente/Asistente.jsx + .css
     Reportes/Reportes.jsx + .css
 ```
 
-## Próximos pasos sugeridos (según el informe del proyecto)
+## Próximos pasos
 
-- Reemplazar `hooks/useAuth.js` y `localStorage` por un backend real
-  de autenticación (API REST en Node.js/Django + MySQL o Firebase
-  Auth, según definan en el diseño de arquitectura), con contraseñas
-  guardadas con hash.
-- Reemplazar `data/mockData.js` y `localStorage` por llamadas a una
-  API REST para productos y ventas.
-- Definir el modelo de datos (diagrama entidad-relación) para
-  productos, ventas y usuarios.
-- Conectar el módulo Asistente a una API de IA real (OpenAI u otra)
-  en vez de las respuestas basadas en reglas de `respuestas.js`.
+- Publicar el backend y el frontend en la nube (con HTTPS) y definir `VITE_API_URL`.
+- Conectar el asistente a un proveedor de IA real configurando `LLM_API_KEY` en el backend (hoy responde con reglas).
+- Pruebas de usabilidad con vendedores reales.
+- Devoluciones parciales y reportes generados en el servidor.

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { api } from "../../api/api.js";
 import { IconSend } from "../Icons/Icons.jsx";
-import { responderAsistente } from "./respuestas.js";
 import "./Asistente.css";
 
 const SUGERIDAS = [
@@ -11,7 +11,9 @@ const SUGERIDAS = [
   "¿Cuánto gané esta semana?",
 ];
 
-export default function Asistente({ productos, ventas }) {
+// Las respuestas las genera el servidor a partir de los datos reales de la cuenta
+// (con un modelo de IA si el backend lo tiene configurado, o con reglas si no).
+export default function Asistente() {
   const [mensajes, setMensajes] = useState([
     {
       from: "bot",
@@ -19,18 +21,27 @@ export default function Asistente({ productos, ventas }) {
     },
   ]);
   const [input, setInput] = useState("");
+  const [pensando, setPensando] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [mensajes]);
+  }, [mensajes, pensando]);
 
-  const enviar = (texto) => {
+  const enviar = async (texto) => {
     const t = (texto ?? input).trim();
-    if (!t) return;
-    const respuesta = responderAsistente(t, productos, ventas);
-    setMensajes((m) => [...m, { from: "user", text: t }, { from: "bot", text: respuesta }]);
+    if (!t || pensando) return;
+    setMensajes((m) => [...m, { from: "user", text: t }]);
     setInput("");
+    setPensando(true);
+    try {
+      const { respuesta } = await api.preguntar(t);
+      setMensajes((m) => [...m, { from: "bot", text: respuesta }]);
+    } catch (e) {
+      setMensajes((m) => [...m, { from: "bot", text: `😕 ${e.message}` }]);
+    } finally {
+      setPensando(false);
+    }
   };
 
   return (
@@ -52,18 +63,20 @@ export default function Asistente({ productos, ventas }) {
             {m.text}
           </div>
         ))}
+        {pensando && <div className="bubble bot">Pensando…</div>}
       </div>
 
       <div className="chat-input-row">
         <input
           placeholder="Escribe tu pregunta…"
           value={input}
+          disabled={pensando}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") enviar();
           }}
         />
-        <button className="send-btn" onClick={() => enviar()}>
+        <button className="send-btn" onClick={() => enviar()} disabled={pensando}>
           <IconSend />
         </button>
       </div>

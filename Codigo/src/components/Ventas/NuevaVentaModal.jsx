@@ -7,6 +7,7 @@ export default function NuevaVentaModal({ productos, onClose, onConfirm }) {
   const [cart, setCart] = useState({}); // productoId -> cantidad
   const [productoSel, setProductoSel] = useState(productos[0]?.id || "");
   const [metodo, setMetodo] = useState("Efectivo");
+  const [enviando, setEnviando] = useState(false);
 
   const addToCart = () => {
     if (!productoSel) return;
@@ -133,9 +134,10 @@ export default function NuevaVentaModal({ productos, onClose, onConfirm }) {
 
         <button
           className="btn btn-primary btn-block"
-          disabled={!puedeConfirmar}
-          onClick={() =>
-            onConfirm(
+          disabled={!puedeConfirmar || enviando}
+          onClick={async () => {
+            setEnviando(true);
+            await onConfirm(
               items.map(({ productoId, cantidad, precioUnit, costoUnit }) => ({
                 productoId,
                 cantidad,
@@ -143,11 +145,12 @@ export default function NuevaVentaModal({ productos, onClose, onConfirm }) {
                 costoUnit,
               })),
               metodo
-            )
-          }
+            );
+            setEnviando(false);
+          }}
           style={{ marginTop: 10 }}
         >
-          Registrar venta
+          {enviando ? "Registrando…" : "Registrar venta"}
         </button>
       </div>
     </div>
