@@ -17,6 +17,7 @@ export default function ProductModal({ producto, onClose, onSave }) {
     stock: producto.stock ?? "",
     stockMin: producto.stockMin ?? 3,
   });
+  const [guardando, setGuardando] = useState(false);
   const valid =
     form.nombre.trim() && form.costo !== "" && form.precio !== "" && form.stock !== "";
 
@@ -112,10 +113,14 @@ export default function ProductModal({ producto, onClose, onSave }) {
 
         <button
           className="btn btn-primary btn-block"
-          disabled={!valid}
-          onClick={() => onSave(form)}
+          disabled={!valid || guardando}
+          onClick={async () => {
+            setGuardando(true);
+            await onSave(form);
+            setGuardando(false);
+          }}
         >
-          Guardar producto
+          {guardando ? "Guardando…" : "Guardar producto"}
         </button>
       </div>
     </div>

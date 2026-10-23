@@ -2,7 +2,7 @@ import { descargarCSV } from "../../utils/csv.js";
 import { finanzasDeVentas, gananciaUnitaria } from "../../utils/finanzas.js";
 import "./Reportes.css";
 
-export default function Reportes({ productos, ventas, onReset }) {
+export default function Reportes({ productos, ventas }) {
   const exportarInventarioCSV = () => {
     const filas = [
       ["Producto", "Categoría", "Precio de compra", "Precio de venta", "Ganancia por unidad", "Stock", "Stock mínimo"],
@@ -22,22 +22,22 @@ export default function Reportes({ productos, ventas, onReset }) {
   };
 
   const exportarVentasCSV = () => {
-    const filas = [["Fecha", "Productos", "Total", "Invertido", "Ganancia", "Método de pago"]];
+    const filas = [["Fecha", "Productos", "Total", "Invertido", "Ganancia", "Método de pago", "Estado"]];
     ventas.forEach((v) => {
       const f = finanzasDeVentas([v], productos);
-      const completa = f.ventasSinCosto === 0; // si falta algún precio de compra, se deja en blanco
+      const completa = f.ventasSinCosto === 0 && v.estado !== "anulada"; // si falta algún precio de compra, se deja en blanco
       filas.push([
         v.fecha,
         v.items
           .map((it) => {
-            const p = productos.find((p) => p.id === it.productoId);
-            return `${it.cantidad}x ${p ? p.nombre : "?"}`;
+            return `${it.cantidad}x ${it.nombre ?? "?"}`;
           })
           .join(" | "),
         v.total,
         completa ? f.invertido : "",
         completa ? f.ganancia : "",
         v.metodo,
+        v.estado === "anulada" ? "Anulada" : "Completada",
       ]);
     });
     descargarCSV("ventas.csv", filas);
@@ -75,12 +75,10 @@ export default function Reportes({ productos, ventas, onReset }) {
       </div>
 
       <div className="card" style={{ background: "var(--surface-alt)", border: "none" }}>
-        <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "var(--ink-soft)" }}>
-          Tus datos se guardan solo en este dispositivo, asociados a tu cuenta.
+        <p style={{ margin: 0, fontSize: 12.5, color: "var(--ink-soft)" }}>
+          Tus datos están guardados de forma segura en el servidor, asociados a tu cuenta: puedes entrar desde cualquier
+          dispositivo con tu correo y contraseña.
         </p>
-        <button className="btn btn-danger btn-sm" onClick={onReset}>
-          Borrar todos mis datos
-        </button>
       </div>
     </div>
   );

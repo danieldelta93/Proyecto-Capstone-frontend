@@ -11,7 +11,7 @@
 //   nombre al compilar, no hay riesgo de servir una versión vieja de
 //   un archivo con el mismo nombre.
 
-const CACHE_NAME = "vendix-cache-v2";
+const CACHE_NAME = "vendix-cache-v3";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -31,6 +31,11 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
+
+  // Los datos de la API (productos, ventas, panel...) NUNCA se guardan en caché: deben ser siempre
+  // los de ahora y los de la cuenta que tiene la sesión iniciada. Tampoco se toca nada de otros sitios.
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
 
   const esNavegacion = request.mode === "navigate" || request.destination === "document";
 

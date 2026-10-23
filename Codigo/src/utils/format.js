@@ -3,7 +3,7 @@ export const fmtCLP = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLo
 export function daysAgoISO(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
+  return d.toLocaleDateString("en-CA"); // AAAA-MM-DD en la hora local (no en UTC)
 }
 
 export const DIAS = [

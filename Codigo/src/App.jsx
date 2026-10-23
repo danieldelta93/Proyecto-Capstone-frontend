@@ -3,19 +3,16 @@ import Login from "./components/Auth/Login.jsx";
 import MainApp from "./MainApp.jsx";
 
 export default function App() {
-  const { user, login, register, logout, error } = useAuth();
+  const { user, cargando, login, register, logout, error } = useAuth();
 
-  if (!user) {
-    return (
-      <Login
-        onLogin={login}
-        onRegister={register}
-        error={error}
-      />
-    );
+  if (cargando) {
+    return <div className="pantalla-carga">Cargando Vendix…</div>;
   }
 
-  // key=user.correo fuerza que la app se vuelva a montar (y a leer
-  // los datos correctos) cada vez que cambia la persona logueada.
-  return <MainApp key={user.correo} user={user} onLogout={logout} />;
+  if (!user) {
+    return <Login onLogin={login} onRegister={register} error={error} />;
+  }
+
+  // key={user.id}: al cambiar de cuenta se vuelve a montar la app y se piden los datos de esa cuenta.
+  return <MainApp key={user.id} user={user} onLogout={logout} />;
 }

@@ -27,16 +27,23 @@ function etiquetaDia(fecha) {
   return texto;
 }
 
-export default function Ventas({ productos, ventas, onRegistrarVenta }) {
+export default function Ventas({ productos, ventas, onRegistrarVenta, onAnularVenta }) {
   const [showNew, setShowNew] = useState(false);
   const [periodo, setPeriodo] = useState("7");
   const [metodo, setMetodo] = useState("Todos");
   const [diasVisibles, setDiasVisibles] = useState(DIAS_POR_PAGINA);
   const [abiertos, setAbiertos] = useState({}); // fecha -> true/false (si el usuario la tocó)
 
-  const registrarVenta = (items, metodoPago) => {
-    onRegistrarVenta(items, metodoPago);
-    setShowNew(false);
+  // el formulario se cierra solo si el servidor aceptó la venta (por ejemplo, si no hay stock, sigue abierto)
+  const registrarVenta = async (items, metodoPago) => {
+    const ok = await onRegistrarVenta(items, metodoPago);
+    if (ok) setShowNew(false);
+  };
+
+  const anular = (v) => {
+    if (confirm("¿Anular esta venta? Los productos vuelven al stock y la venta deja de sumar en tus totales.")) {
+      onAnularVenta(v.id);
+    }
   };
 
   // ventas del período y método elegidos
@@ -58,11 +65,13 @@ export default function Ventas({ productos, ventas, onRegistrarVenta }) {
       .sort((a, b) => b.localeCompare(a))
       .map((fecha) => {
         const lista = porFecha[fecha].sort((a, b) => b.id - a.id);
+        const contables = lista.filter((v) => v.estado !== "anulada"); // las anuladas se muestran, pero no suman
         return {
           fecha,
           ventas: lista,
-          total: lista.reduce((a, v) => a + v.total, 0),
-          fin: finanzasDeVentas(lista, productos),
+          contables,
+          total: contables.reduce((a, v) => a + v.total, 0),
+          fin: finanzasDeVentas(contables, productos),
         };
       });
   }, [filtradas, productos]);
@@ -71,8 +80,9 @@ export default function Ventas({ productos, ventas, onRegistrarVenta }) {
     setDiasVisibles(DIAS_POR_PAGINA);
   }, [periodo, metodo]);
 
-  const totalPeriodo = filtradas.reduce((a, v) => a + v.total, 0);
-  const fin = useMemo(() => finanzasDeVentas(filtradas, productos), [filtradas, productos]);
+  const contablesPeriodo = useMemo(() => filtradas.filter((v) => v.estado !== "anulada"), [filtradas]);
+  const totalPeriodo = contablesPeriodo.reduce((a, v) => a + v.total, 0);
+  const fin = useMemo(() => finanzasDeVentas(contablesPeriodo, productos), [contablesPeriodo, productos]);
   const hayGanancia = fin.ingresos > 0;
   const diasMostrados = dias.slice(0, diasVisibles);
   const diasRestantes = dias.length - diasMostrados.length;
@@ -119,7 +129,7 @@ export default function Ventas({ productos, ventas, onRegistrarVenta }) {
         </div>
         <div>
           <p className="label">Ventas</p>
-          <p className="valor">{filtradas.length}</p>
+          <p className="valor">{contablesPeriodo.length}</p>
         </div>
       </div>
       {fin.ventasSinCosto > 0 && (
@@ -164,7 +174,7 @@ export default function Ventas({ productos, ventas, onRegistrarVenta }) {
               <span className="dia-resumen">
                 <b>{fmtCLP(dia.total)}</b>
                 <small>
-                  {dia.ventas.length} venta{dia.ventas.length === 1 ? "" : "s"}
+                  {dia.contables.length} venta{dia.contables.length === 1 ? "" : "s"}
                   {dia.fin.ingresos > 0 && ` · gana ${fmtCLP(dia.fin.ganancia)}`}
                 </small>
               </span>
@@ -173,17 +183,22 @@ export default function Ventas({ productos, ventas, onRegistrarVenta }) {
             {abierto && (
               <div className="dia-ventas">
                 {dia.ventas.map((v) => (
-                  <div className="venta-row" key={v.id}>
+                  <div className={"venta-row" + (v.estado === "anulada" ? " anulada" : "")} key={v.id}>
                     <div className="venta-items">
                       {v.items.map((it, i) => (
                         <p key={i}>
-                          {it.cantidad}× {nombreProducto(it.productoId)}
+                          {it.cantidad}× {it.nombre ?? nombreProducto(it.productoId)}
                         </p>
                       ))}
+                      {v.estado !== "anulada" && (
+                        <button className="venta-anular" onClick={() => anular(v)}>
+                          Anular venta
+                        </button>
+                      )}
                     </div>
                     <div className="prod-right">
                       <p className="prod-price">{fmtCLP(v.total)}</p>
-                      <span className="payment-tag">{v.metodo}</span>
+                      <span className="payment-tag">{v.estado === "anulada" ? "Anulada" : v.metodo}</span>
                     </div>
                   </div>
                 ))}

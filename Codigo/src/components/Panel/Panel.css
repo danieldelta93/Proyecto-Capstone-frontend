@@ -21,3 +21,8 @@
 .punto.gris{background:var(--ink-soft);}
 .punto.verde{background:var(--primary);}
 .fin-nota{font-size:11.5px; color:var(--ink-soft); margin:8px 6px 6px; line-height:1.4;}
+
+/* Tendencia frente al período anterior */
+.stat-card .variacion{font-size:11.5px; font-weight:600; margin:3px 0 0;}
+.stat-card .variacion.sube{color:var(--primary);}
+.stat-card .variacion.baja{color:var(--danger);}
