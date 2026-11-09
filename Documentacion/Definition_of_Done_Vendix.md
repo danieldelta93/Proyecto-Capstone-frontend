@@ -1,75 +1,58 @@
-# Definition of Done (DoD) --- Vendix
+# Definition of Done (DoD) y criterios de aceptación — Vendix
 
-**Proyecto APT · Ingeniería en Informática · Duoc UC, sede Valparaíso**\
-Versión 1.0
+**Versión 2.0 · Actualizado: noviembre de 2026**
 
-Este documento define los criterios mínimos que el equipo utilizará para
-considerar terminada una historia de usuario, tarea o funcionalidad de
-Vendix. Los criterios son una guía práctica para el proyecto académico y
-deben aplicarse según el tipo de cambio.
+## 1. Definition of Done
 
-## Criterios de terminado
+Una historia de usuario se considera **terminada** solo si cumple *todo* lo siguiente:
 
-### 1. Funcionalidad
+**Funcionalidad**
+- [ ] Cumple los criterios de aceptación de la historia (sección 2).
+- [ ] Funciona de punta a punta: pantalla → API → base de datos.
+- [ ] Maneja los errores con mensajes claros en español (por ejemplo, "Stock insuficiente de Gorro: quedan 2").
 
--   [ ] La funcionalidad cumple la historia de usuario y sus criterios
-    de aceptación.
--   [ ] Los campos obligatorios y las reglas de validación se comportan
-    según lo esperado.
--   [ ] Los mensajes de éxito y error son comprensibles para el usuario.
+**Calidad**
+- [ ] Tiene pruebas automáticas de la lógica nueva y todas las pruebas existentes pasan (`npm test`).
+- [ ] La prueba de humo (`npm run smoke`) pasa con la API encendida.
+- [ ] Se probó en el celular o en un ancho de pantalla de celular y en al menos dos navegadores.
+- [ ] Los datos de una cuenta no se pueden ver ni modificar desde otra.
 
-### 2. Código e integración
+**Código**
+- [ ] Está revisado por la otra persona del equipo (o se explicó en la reunión).
+- [ ] Sigue la estructura del proyecto (frontend: un componente por carpeta con su CSS; backend: rutas → servicios → base de datos).
+- [ ] No hay claves, contraseñas ni archivos `.env` en el repositorio.
+- [ ] Está subido a GitHub con un mensaje de commit que describe el cambio.
 
--   [ ] El código se guarda en el repositorio correspondiente y se
-    integra en la rama de trabajo acordada por el equipo.
--   [ ] La funcionalidad no introduce errores conocidos que bloqueen los
-    flujos principales.
--   [ ] Si intervienen frontend y backend, se comprueba la comunicación
-    entre ambos componentes.
+**Documentación**
+- [ ] Si cambió la API, se actualizó `docs/API.md`.
+- [ ] Si cambió la base de datos, se actualizaron `database/schema.sql` y el diagrama entidad-relación.
+- [ ] El estado de la historia se actualizó en el Product Backlog y en el Sprint Backlog.
 
-### 3. Pruebas
+## 2. Criterios de aceptación (ejemplos por historia)
 
--   [ ] Se realizan las pruebas pertinentes para el cambio (manuales y/o
-    automatizadas).
--   [ ] Se registran los resultados de las pruebas realizadas.
--   [ ] Si una prueba falla, el problema se corrige o queda documentado
-    explícitamente como pendiente; no se declara la historia terminada
-    si el fallo impide cumplir sus criterios de aceptación.
+**HU-05 — Registrar un producto con precio de compra y de venta**
+- *Dado* que estoy con sesión iniciada, *cuando* guardo un producto con compra $3.000 y venta $5.000, *entonces* aparece en mi inventario con "Ganas $2.000 c/u".
+- *Dado* que dejo vacío el precio de compra, *cuando* intento guardar, *entonces* el botón queda desactivado.
+- *Dado* que vendo bajo el costo (compra $5.000, venta $3.000), *cuando* escribo los precios, *entonces* se muestra un aviso en rojo.
 
-### 4. Datos y seguridad
+**HU-11 y HU-12 — Registrar una venta y no vender más de lo que hay**
+- *Dado* un producto con 10 unidades, *cuando* vendo 3, *entonces* el stock queda en 7 y la venta aparece en el historial del día.
+- *Dado* un producto con 2 unidades, *cuando* intento vender 5, *entonces* el sistema rechaza la venta, muestra cuánto stock queda y no cambia nada.
+- *Dado* una venta con varios productos donde uno no alcanza, *cuando* la confirmo, *entonces* no se descuenta el stock de ninguno.
 
--   [ ] Las operaciones que usan la base de datos se verifican con datos
-    de prueba apropiados.
--   [ ] Los datos se guardan y consultan de forma coherente con el
-    comportamiento esperado.
--   [ ] No se suben al repositorio contraseñas, tokens ni claves
-    privadas.
+**HU-14 — Anular una venta**
+- *Dado* una venta de 3 unidades, *cuando* la anulo, *entonces* el stock vuelve a su valor anterior, la venta se ve tachada y deja de sumar en los totales.
+- *Dado* una venta ya anulada, *cuando* intento anularla otra vez, *entonces* el sistema lo rechaza.
 
-### 5. Documentación
+**HU-21 — Ver inversión y ganancia**
+- *Dado* ventas de productos con precio de compra, *cuando* abro el panel, *entonces* veo lo invertido, la ganancia y el margen, y *invertido + ganancia = total vendido*.
+- *Dado* ventas de productos sin precio de compra, *cuando* abro el panel, *entonces* esas ventas no cuentan en la ganancia y el panel lo avisa.
 
--   [ ] Se actualiza la documentación afectada por el cambio, cuando
-    corresponde.
--   [ ] Las instrucciones de instalación, configuración o uso siguen
-    siendo coherentes con el código.
+**HU-02 — Iniciar sesión**
+- *Dado* un correo y contraseña correctos, *cuando* inicio sesión, *entonces* entro a mi negocio y veo mis datos.
+- *Dado* una contraseña incorrecta, *cuando* inicio sesión, *entonces* veo "Correo o contraseña incorrectos" (el mismo mensaje si el correo no existe).
+- *Dado* que mi sesión venció, *cuando* uso la app, *entonces* vuelvo a la pantalla de inicio de sesión.
 
-### 6. Revisión final
-
--   [ ] El responsable revisa que el cambio esté completo y que los
-    criterios de aceptación se hayan comprobado.
--   [ ] El estado de la tarea o historia se actualiza en el tablero o
-    Sprint Backlog del equipo.
--   [ ] La funcionalidad solo se marca como terminada cuando existe
-    evidencia razonable de que cumple lo acordado.
-
-## Aplicación de la definición
-
-Antes de cerrar una tarea, el equipo revisa los criterios aplicables y
-registra las pruebas o verificaciones realizadas. No todos los criterios
-requieren el mismo tipo de evidencia en cada tarea; por ejemplo, un
-cambio de texto puede necesitar una revisión visual, mientras que un
-cambio en ventas o inventario requiere pruebas funcionales y
-comprobación de datos.
-
-Esta definición es una propuesta de trabajo para Vendix. El equipo puede
-ajustarla si acuerda criterios adicionales o si la pauta de evaluación
-establece otros requisitos.
+**HU-24 — Preguntar al asistente**
+- *Dado* que tengo ventas registradas, *cuando* pregunto "¿Cuánto gané esta semana?", *entonces* la respuesta usa mis cifras reales de los últimos 7 días.
+- *Dado* que no tengo ventas, *cuando* pregunto lo mismo, *entonces* me dice que todavía no hay datos y no inventa cifras.

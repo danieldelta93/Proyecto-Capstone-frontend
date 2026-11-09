@@ -1,136 +1,69 @@
-# Diagramas UML y arquitectura --- Vendix
+# Diagramas UML y de arquitectura — Vendix
 
-**Proyecto APT · Ingeniería en Informática · Duoc UC, sede Valparaíso**\
-Versión 1.0
+**Versión 2.0 · Actualizado: noviembre de 2026**
 
-Estos diagramas resumen el diseño conocido de Vendix a partir de la
-descripción del proyecto y de los componentes identificados en el
-backend. Son una base documental: antes de usarlos como representación
-definitiva, comparar el diagrama entidad-relación con
-`database/schema.sql` y revisar los nombres exactos de tablas, columnas
-y relaciones. Los diagramas de casos de uso y arquitectura describen el
-alcance previsto y no prueban por sí mismos que todas las funciones
-estén integradas.
+Los diagramas de este documento representan el sistema **tal como está implementado** (frontend en React, API en Node/Express
+y base de datos MySQL). Los archivos fuente (Mermaid, texto editable) están en `img/*.mmd`; las imágenes se regeneran con
+`mmdc -i archivo.mmd -o archivo.png`.
 
-## 1. Diagrama de casos de uso (vista funcional)
+| Diagrama | Tipo | Imagen |
+|---|---|---|
+| Arquitectura del sistema | Arquitectura | `img/arquitectura.png` |
+| Casos de uso | UML — casos de uso | `img/casos_de_uso.png` |
+| Clases del dominio | UML — clases | `img/clases_dominio.png` |
+| Clases de servicios (capas del backend) | UML — clases | `img/clases_servicios.png` |
+| Registrar una venta | UML — secuencia | `img/secuencia_venta.png` |
+| Iniciar sesión y consultar el panel | UML — secuencia | `img/secuencia_login_panel.png` |
+| Componentes | UML — componentes | `img/componentes.png` |
+| Modelo entidad-relación | Base de datos | `img/er.png` |
 
-``` mermaid
-flowchart LR
-    V["Vendedor / Usuario"]
-    A["Autenticación"]
-    P["Gestionar productos"]
-    S["Registrar y consultar ventas"]
-    I["Consultar inventario"]
-    R["Consultar estadísticas y reportes"]
-    AI["Consultar asistente"]
-    H["Consultar estado de API"]
+## 1. Arquitectura del sistema
 
-    V --> A
-    V --> P
-    V --> S
-    V --> I
-    V --> R
-    V --> AI
-    V --> H
-```
+![Arquitectura](img/arquitectura.png)
 
-**Lectura:** el usuario interactúa con las funciones de autenticación,
-productos, ventas, inventario, reportes y asistente. La disponibilidad
-real de cada caso de uso debe validarse en la aplicación integrada.
+El comerciante usa la app (React, instalable en el celular). La app habla con la API REST por HTTPS enviando un token de sesión.
+La API valida y aplica las reglas del negocio y guarda todo en MySQL. Si hay una clave configurada, el asistente consulta a un proveedor de IA.
 
-## 2. Diagrama de arquitectura (vista de componentes)
+## 2. Casos de uso
 
-``` mermaid
-flowchart TD
-    U["Usuario"]
-    FE["Frontend<br/>React + Vite"]
-    API["Backend<br/>Node.js + Express<br/>API REST"]
-    AUTH["Autenticación<br/>JWT"]
-    SVC["Servicios y rutas<br/>de negocio"]
-    DB[("MySQL")]
-    LLM["Proveedor de IA opcional"]
+![Casos de uso](img/casos_de_uso.png)
 
-    U --> FE
-    FE -->|"HTTP / JSON"| API
-    API --> AUTH
-    API --> SVC
-    SVC --> DB
-    SVC -.->|"si está configurado"| LLM
-```
+El comerciante es el actor principal. Registrar y anular una venta *incluyen* el descuento (o devolución) automático de stock;
+el panel *incluye* la inversión y la ganancia. El proveedor de IA es un actor externo opcional del asistente.
 
-**Lectura:** el frontend React se comunica con la API REST Express
-usando HTTP/JSON. El backend aplica autenticación y lógica de negocio y
-consulta MySQL. La conexión con un proveedor de IA es opcional y depende
-de la configuración.
+## 3. Diagrama de clases del dominio
 
-## 3. Diagrama entidad-relación (modelo de datos)
+![Clases del dominio](img/clases_dominio.png)
 
-``` mermaid
-erDiagram
-    USUARIOS ||--o{ PRODUCTOS : administra
-    USUARIOS ||--o{ VENTAS : registra
-    VENTAS ||--|{ DETALLE_VENTAS : contiene
-    PRODUCTOS ||--o{ DETALLE_VENTAS : aparece_en
-    PRODUCTOS ||--o{ MOVIMIENTOS_STOCK : registra
+Una cuenta (**Usuario**) tiene categorías, productos y ventas. Una **Venta** contiene uno o más **VentaItem**, que guardan el nombre,
+el precio y el costo del momento. Cada cambio de stock queda en **MovimientoStock**.
 
-    USUARIOS {
-        int id_usuario PK
-        string nombre
-        string correo
-        string password_hash
-    }
-    PRODUCTOS {
-        int id_producto PK
-        int id_usuario FK
-        string nombre
-        decimal precio
-        int stock
-    }
-    VENTAS {
-        int id_venta PK
-        int id_usuario FK
-        datetime fecha
-        decimal total
-    }
-    DETALLE_VENTAS {
-        int id_detalle PK
-        int id_venta FK
-        int id_producto FK
-        int cantidad
-        decimal precio_unitario
-    }
-    MOVIMIENTOS_STOCK {
-        int id_movimiento PK
-        int id_producto FK
-        string tipo
-        int cantidad
-        datetime fecha
-    }
-```
+## 4. Diagrama de clases de servicios (capas del backend)
 
-**Importante:** los nombres de campos de este esquema son
-representativos para explicar las relaciones previstas. Deben
-confirmarse con `database/schema.sql` antes de entregar este diagrama
-como modelo exacto de la base de datos. El backend ya contiene
-`docs/er.mmd` y `docs/modelo-entidad-relacion.png`; si estos
-corresponden al esquema vigente, conviene priorizarlos y no mantener dos
-diagramas divergentes.
+![Clases de servicios](img/clases_servicios.png)
 
-## 4. Archivos incluidos
+Las rutas REST llaman a los servicios (lógica del negocio); los servicios usan una única pieza de control de stock y la capa de base de datos
+(consultas y transacciones). Esta separación permite probar la lógica sin levantar el servidor.
 
--   `Diagramas_UML_Vendix.md`: los tres diagramas en Mermaid,
-    renderizables en GitHub.
--   `casos_de_uso.mmd`: fuente del diagrama de casos de uso.
--   `arquitectura.mmd`: fuente del diagrama de arquitectura.
--   `modelo_datos_referencia.mmd`: modelo de datos de referencia,
-    pendiente de cotejo con el esquema real.
+## 5. Diagrama de secuencia: registrar una venta
 
-## 5. Verificación antes de entregar
+![Secuencia de una venta](img/secuencia_venta.png)
 
--   [ ] Confirmar los nombres exactos de tablas y columnas con
-    `database/schema.sql`.
--   [ ] Revisar que la arquitectura coincida con los archivos y
-    servicios actuales.
--   [ ] Confirmar qué módulos están conectados desde el frontend.
--   [ ] Sustituir cualquier relación o función que no corresponda al
-    código vigente.
+Todo ocurre dentro de una transacción: si algún producto no tiene stock suficiente, se deshace la venta completa y la app muestra el stock real.
+
+## 6. Diagrama de secuencia: iniciar sesión y consultar el panel
+
+![Secuencia de login y panel](img/secuencia_login_panel.png)
+
+## 7. Diagrama de componentes
+
+![Componentes](img/componentes.png)
+
+En el frontend, `App` decide entre `Login` y `MainApp`; `MainApp` carga los datos y los reparte a las cinco pantallas, y todas hablan
+con el servidor a través de la carpeta `api/`. En el backend, una petición atraviesa rutas, seguridad, servicios y base de datos.
+
+## 8. Modelo entidad-relación
+
+![Modelo entidad-relación](img/er.png)
+
+Detalle de cada tabla y de las decisiones de diseño: `Codigo/docs/MODELO_DE_DATOS.md` en el repositorio del backend.

@@ -1,155 +1,109 @@
-# Sprint Backlog --- Vendix
+# Sprint Backlog — Vendix
 
-**Proyecto APT · Ingeniería en Informática · Duoc UC, sede Valparaíso**\
-Versión 1.0 · Backlog inicial propuesto; actualizar estados según el
-avance verificado.
+**Versión 2.0 · Actualizado: noviembre de 2026**
 
-## 1. Propósito
+Cada sprint dura dos semanas (los de mayor tamaño, tres). Los números S1–S18 son las semanas del semestre.
+Las historias (HU-xx) están descritas en `Product_Backlog_Vendix.md`. Los responsables reflejan los roles del equipo
+(Daniel: backend, base de datos, IA y despliegue; Esteban: frontend, diseño y pruebas de usabilidad) y se pueden ajustar.
 
-Este Sprint Backlog inicial organiza historias de usuario de Vendix y
-sus criterios de aceptación. Se construyó a partir de los módulos
-identificados en el frontend y de las capacidades descritas en el
-backend entregado. No reemplaza el tablero real del equipo ni confirma
-que una historia esté terminada.
+Estados: **Hecho** · **En curso** · **Pendiente**.
 
-## 2. Priorización
+---
 
--   **Alta:** funciones centrales necesarias para operar con productos,
-    ventas e inventario.
--   **Media:** funciones de apoyo y consulta.
+## Sprint 0 · S1–S4 · Planificación y diseño
 
-La prioridad es una propuesta inicial y debe validarse con el equipo y
-la pauta de evaluación.
+**Objetivo:** entender el problema, definir el alcance y diseñar la solución.
 
-## 3. Historias de usuario
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Definir problema, objetivos y alcance (informe de la Fase 1) | Equipo | Hecho |
+| Levantar requerimientos y módulos | Equipo | Hecho |
+| Elegir tecnologías | Equipo | Hecho |
+| Diseñar la interfaz móvil (paleta, navegación, flujos) | Esteban | Hecho |
+| Presentación de la Fase 1 | Equipo | Hecho |
 
-### HU-01 --- Iniciar sesión · Prioridad: Alta
+---
 
-**Historia:** Como usuario, quiero iniciar sesión para acceder a las
-funciones del sistema de forma controlada.
+## Sprint 1 · S5–S6 · Inventario
 
-**Criterios de aceptación:** Con credenciales válidas, el sistema
-permite el acceso; con credenciales inválidas, muestra un mensaje claro;
-las rutas protegidas no deben quedar accesibles sin autorización.
+**Objetivo:** que el comerciante pueda gestionar sus productos. **Historias:** HU-05, HU-06, HU-07, HU-09.
 
-**Estado inicial:** Por verificar en integración
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Pantalla de inventario y formulario de producto (frontend) | Esteban / Daniel | Hecho |
+| Búsqueda, filtros por categoría y alertas de stock bajo | Esteban / Daniel | Hecho |
+| API y tablas de productos (backend) | Daniel | Hecho (se completó en el Sprint 3, con retraso respecto del plan) |
 
-**Nota de verificación:** El backend incluye autenticación con JWT.
-Verificar que el frontend use la API real y no solamente autenticación
-simulada/localStorage.
+**Resultado:** el frontend se terminó a tiempo con datos locales; el backend se retrasó por la salida de un integrante (ver retrospectiva).
 
-### HU-02 --- Gestionar productos · Prioridad: Alta
+---
 
-**Historia:** Como vendedor, quiero registrar, consultar, modificar y
-eliminar productos para mantener actualizado mi catálogo.
+## Sprint 2 · S7–S8 · Ventas
 
-**Criterios de aceptación:** Los campos obligatorios se validan; los
-cambios confirmados se guardan en MySQL; los errores se informan de
-forma comprensible.
+**Objetivo:** registrar ventas con descuento automático de stock. **Historias:** HU-11, HU-13.
 
-**Estado inicial:** Backend contemplado; integración por verificar
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Carrito de venta, método de pago e historial (frontend) | Esteban / Daniel | Hecho |
+| API de ventas con transacciones y control de stock (backend) | Daniel | Hecho (se completó en el Sprint 3) |
+| Reordenar prioridades tras la salida de un integrante | Equipo | Hecho |
 
-**Nota de verificación:** Comprobar los endpoints de productos y el
-flujo desde la interfaz.
+---
 
-### HU-03 --- Registrar ventas · Prioridad: Alta
+## Sprint 3 · S9–S10 (extendido) · Panel, cuentas, ganancia e integración
 
-**Historia:** Como vendedor, quiero registrar una venta para mantener un
-historial de mis operaciones.
+**Objetivo:** pasar de un prototipo local a un sistema conectado: cuentas, panel, ganancia, API y base de datos.
+**Historias:** HU-01 a HU-04, HU-08, HU-12, HU-14, HU-15, HU-17 a HU-23, HU-26 a HU-28, HU-31.
 
-**Criterios de aceptación:** Se registran los productos, cantidades y
-totales; se validan los datos; la venta queda persistida y puede
-consultarse después.
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Cuentas con correo y contraseña; sesión con token | Daniel / Esteban | Hecho |
+| Precio de compra, precio de venta y ganancia por unidad | Esteban / Daniel | Hecho |
+| Panel: ventas por día, más vendidos, inversión y ganancia, alertas | Esteban / Daniel | Hecho |
+| Reportes CSV y PDF; app instalable (PWA) | Esteban | Hecho |
+| Reorganizar el código (una carpeta y un CSS por componente) | Esteban / Daniel | Hecho |
+| Diseño de la base de datos (6 tablas) y diagrama entidad-relación | Daniel | Hecho |
+| API REST completa (cuentas, productos, ventas, estadísticas, asistente) | Daniel | Hecho |
+| Pruebas automáticas (lógica, seguridad y rendimiento) y prueba de humo | Daniel | Hecho |
+| Conectar el frontend a la API (sin datos locales) | Daniel / Esteban | Hecho |
+| Docker para MySQL y la API | Daniel | Hecho |
 
-**Estado inicial:** Backend contemplado; integración por verificar
+---
 
-**Nota de verificación:** Probar una venta completa con datos de prueba
-y comprobar la persistencia.
+## Sprint 4 · S11–S13 · Asistente de IA y pruebas con usuarios
 
-### HU-04 --- Actualizar existencias · Prioridad: Alta
+**Objetivo:** que el asistente use datos reales (y, si es posible, IA) y validar con comerciantes. **Historias:** HU-24, HU-25, HU-32.
 
-**Historia:** Como vendedor, quiero que el inventario refleje los
-movimientos de productos para conocer las existencias disponibles.
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Asistente con reglas sobre los datos reales | Daniel | Hecho (adelantado) |
+| Probar el asistente con un proveedor de IA (clave en `.env`) | Daniel | Pendiente |
+| Guion de pruebas de usabilidad y formulario de retroalimentación | Esteban | Pendiente |
+| Pruebas guiadas con al menos 5 personas | Esteban / Daniel | Pendiente |
+| Documentación técnica y de producto | Equipo | En curso (este conjunto de documentos) |
 
-**Criterios de aceptación:** Los movimientos de venta afectan el stock
-según las reglas implementadas; no se permiten operaciones inválidas;
-los cambios quedan reflejados en la base de datos.
+---
 
-**Estado inicial:** Backend contemplado; integración por verificar
+## Sprint 5 · S14–S16 · Ajustes y publicación
 
-**Nota de verificación:** Verificar las reglas reales de stock en
-servicios y pruebas antes de marcar como terminado.
+**Objetivo:** corregir lo que salga de las pruebas y publicar la aplicación. **Historias:** HU-10, HU-20, HU-22, HU-29.
 
-### HU-05 --- Consultar estadísticas y reportes · Prioridad: Media
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Pantalla de reposición y ajuste de stock (HU-10) | Esteban | Pendiente |
+| Mostrar "menos vendidos" y ventas por semana/mes en el panel (HU-20, HU-22) | Esteban | Pendiente |
+| Correcciones según las pruebas con usuarios | Equipo | Pendiente |
+| Publicar la API, MySQL y el frontend con HTTPS (HU-29) | Daniel | Pendiente |
+| Programar respaldos de la base de datos | Daniel | Pendiente |
 
-**Historia:** Como vendedor, quiero consultar estadísticas de ventas e
-inventario para entender el movimiento del negocio.
+---
 
-**Criterios de aceptación:** Los datos mostrados corresponden a las
-respuestas de la API; los rangos o filtros disponibles se comportan
-correctamente; los estados sin datos se muestran claramente.
+## Sprint 6 · S17–S18 · Cierre
 
-**Estado inicial:** Por verificar
+**Objetivo:** entregar el proyecto final. **Historias:** HU-33.
 
-**Nota de verificación:** Comparar cifras de la interfaz con resultados
-de la API y datos de prueba.
-
-### HU-06 --- Consultar al asistente · Prioridad: Media
-
-**Historia:** Como usuario, quiero hacer preguntas relacionadas con la
-gestión del negocio para recibir orientación a partir de las capacidades
-disponibles del sistema.
-
-**Criterios de aceptación:** El endpoint responde con un mensaje; si la
-integración con IA no está configurada, el comportamiento alternativo se
-comunica adecuadamente; los errores no exponen claves ni detalles
-sensibles.
-
-**Estado inicial:** Backend contempla IA opcional y reglas; integración
-por verificar
-
-**Nota de verificación:** No afirmar que la IA está activa hasta
-configurar y probar el proveedor.
-
-### HU-07 --- Revisar el estado del sistema · Prioridad: Media
-
-**Historia:** Como integrante del equipo, quiero comprobar si la API
-está disponible para facilitar la verificación del entorno.
-
-**Criterios de aceptación:** La ruta de salud devuelve una respuesta
-coherente e informa el estado documentado de la API y dependencias.
-
-**Estado inicial:** Por verificar mediante ejecución
-
-**Nota de verificación:** Comprobar la ruta /api/salud con el backend
-levantado.
-
-## 4. Tareas técnicas transversales
-
--   [ ] Configurar variables de entorno sin versionar secretos.
--   [ ] Preparar MySQL y ejecutar el script de inicialización en un
-    entorno de prueba.
--   [ ] Levantar el backend y comprobar la ruta de salud.
--   [ ] Configurar la URL de la API en el frontend y comprobar CORS.
--   [ ] Ejecutar las pruebas automáticas y el script de prueba de humo;
-    guardar resultados reales.
--   [ ] Validar flujos desde la interfaz y comprobar que los datos
-    persisten en MySQL.
--   [ ] Actualizar la documentación de API, modelo de datos e
-    instalación cuando cambie el código.
-
-## 5. Definición de terminado provisional
-
-Una historia puede marcarse como terminada cuando cumple sus criterios
-de aceptación, la validación pertinente se ha ejecutado y registrado,
-los cambios están integrados, no quedan errores bloqueantes conocidos y
-la documentación relevante está actualizada. La Definition of Done
-formal se documentará por separado.
-
-## 6. Seguimiento por sprint
-
-Para cada sprint, el equipo debe seleccionar historias según capacidad y
-prioridad, dividirlas en tareas concretas, asignar responsables, estimar
-esfuerzo y actualizar el estado con evidencia. No se asignan fechas,
-puntos ni sprints ficticios en este documento porque no se proporcionó
-el tablero histórico del equipo.
+| Tarea | Responsable | Estado |
+|---|---|---|
+| Manual de usuario | Esteban | Pendiente |
+| Informe y evidencias de la Fase 3 | Equipo | Pendiente |
+| Presentación final y demostración | Equipo | Pendiente |

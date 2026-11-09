@@ -1,263 +1,130 @@
-# Plan de Pruebas --- Vendix
-
-**Proyecto APT · Ingeniería en Informática · Duoc UC, sede Valparaíso**\
-Versión 1.0
-
-Este plan define pruebas funcionales iniciales para Vendix. Los
-resultados no se han marcado como aprobados: deben ejecutarse en el
-entorno del equipo y registrarse con evidencia. Los pasos deben
-ajustarse si la implementación real difiere de la descripción o si el
-entorno de prueba requiere otros datos.
-
-## 1. Objetivo
-
-Comprobar de forma ordenada los flujos principales de autenticación,
-productos, ventas, inventario, estadísticas, asistente y disponibilidad
-de la API.
-
-## 2. Alcance
-
-Incluye pruebas funcionales manuales y verificaciones de persistencia.
-Se recomienda ejecutarlas primero en un entorno de prueba con datos
-ficticios, no sobre datos reales de negocio.
-
-## 3. Condiciones previas
-
--   [ ] Tener las dependencias del backend y frontend instaladas.
--   [ ] Configurar el archivo `.env` con valores de prueba y sin
-    compartir secretos.
--   [ ] Tener MySQL disponible y el esquema inicializado.
--   [ ] Levantar backend y frontend, y confirmar la URL de la API.
--   [ ] Preparar una cuenta y productos de prueba; anotar los datos
-    iniciales de stock y ventas.
-
-## 4. Casos de prueba
-
-### CP-01 --- Inicio de sesión con credenciales válidas
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Ingresar credenciales de una cuenta de prueba existente y
-enviar el formulario.
-
-**Resultado esperado:** El sistema permite el acceso y muestra la vista
-autorizada.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-02 --- Inicio de sesión con credenciales inválidas
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Ingresar una contraseña incorrecta para una cuenta de prueba.
-
-**Resultado esperado:** El sistema rechaza el acceso y muestra un
-mensaje claro sin exponer información sensible.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-03 --- Acceso a una ruta protegida sin sesión
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Intentar acceder a una función protegida sin token o sesión
-válida.
-
-**Resultado esperado:** La API rechaza la solicitud no autorizada.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-04 --- Crear un producto válido
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Enviar nombre, precio y demás campos obligatorios válidos a
-través de la interfaz/API.
-
-**Resultado esperado:** El producto se guarda y aparece en la consulta
-posterior.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-05 --- Validación de producto inválido
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Enviar un producto con un campo obligatorio ausente o un
-valor no permitido.
-
-**Resultado esperado:** La solicitud se rechaza con un error de
-validación comprensible.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-06 --- Registrar una venta válida
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Crear una venta de prueba con productos existentes y
-cantidades válidas.
-
-**Resultado esperado:** La venta se guarda, el total es coherente y el
-inventario se actualiza según las reglas implementadas.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-07 --- Venta con stock insuficiente
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Intentar vender una cantidad mayor que las existencias
-disponibles.
-
-**Resultado esperado:** La operación se rechaza si esa es la regla
-implementada y el stock no queda inconsistente.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar / confirmar regla
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-08 --- Consultar inventario
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Abrir el módulo de inventario y consultar las existencias de
-un producto de prueba.
-
-**Resultado esperado:** La interfaz muestra datos coherentes con la
-respuesta de la API y la base de datos.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-09 --- Consultar estadísticas
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Consultar estadísticas con datos de ventas de prueba
-conocidos.
-
-**Resultado esperado:** Los valores mostrados coinciden con los datos
-disponibles y los filtros usados.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-10 --- Asistente sin clave de IA
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Ejecutar una consulta al asistente sin configurar la clave
-del proveedor de IA.
-
-**Resultado esperado:** El backend utiliza el comportamiento alternativo
-documentado o informa claramente que la función no está disponible.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-11 --- Ruta de salud de la API
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Con el backend iniciado, consultar GET /api/salud.
-
-**Resultado esperado:** La API devuelve la respuesta de salud
-documentada y refleja el estado de las dependencias según su
-implementación.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-### CP-12 --- Persistencia tras reinicio
-
-**Precondición:** Entorno de prueba disponible; preparar los datos
-necesarios para este caso.
-
-**Pasos:** Crear un producto de prueba, reiniciar el backend y consultar
-el producto nuevamente.
-
-**Resultado esperado:** El producto continúa disponible si la operación
-fue confirmada en MySQL.
-
-**Resultado real:** Completar después de ejecutar la prueba.
-
-**Estado inicial:** Por ejecutar
-
-**Evidencia:** Agregar captura, salida de consola, respuesta HTTP o
-consulta de base de datos, según corresponda.
-
-## 5. Registro de resultados
-
-Utiliza uno de estos estados al ejecutar cada caso: **Aprobado**,
-**Fallido**, **Bloqueado** o **No ejecutado**. Si falla, anota los pasos
-reproducibles, el resultado obtenido y el defecto asociado. No cambies
-el estado a Aprobado sin evidencia.
-
-## 6. Criterio de cierre
-
-El plan puede considerarse ejecutado cuando todos los casos aplicables
-tienen un estado y evidencia o una justificación de bloqueo. Los fallos
-que impidan cumplir los criterios de aceptación deben resolverse o
-quedar declarados como pendientes antes de afirmar que el sistema está
-validado.
+# Plan de pruebas y resultados — Vendix
+
+**Versión 2.0 · Actualizado: noviembre de 2026**
+
+## 1. Objetivo y alcance
+
+Comprobar que Vendix funciona correctamente, de forma segura y con buen desempeño, y que resulta fácil de usar para comerciantes sin
+conocimientos técnicos. Cubre el backend (API y base de datos), la integración frontend–backend y la experiencia de usuario.
+
+## 2. Estrategia por tipo de prueba
+
+| Tipo | Qué verifica | Herramienta | Dónde |
+|---|---|---|---|
+| Unitarias (lógica del negocio) | Reglas de usuarios, productos, ventas, estadísticas y asistente | `node:test` sobre los servicios | `Codigo/pruebas/*.test.js` (backend) |
+| Integración | Que todas las piezas funcionen juntas: cuenta → producto → venta → panel → anulación | Prueba de humo contra la API encendida | `npm run smoke` |
+| Seguridad | Inyección SQL, aislamiento entre cuentas, contraseñas, sesiones, límite de intentos, errores | `node:test` | `pruebas/seguridad.test.js`, `pruebas/token.test.js` |
+| Rendimiento | Tiempos de las consultas con 1.000 productos y 5.000 ventas | `node:test` | `pruebas/rendimiento.test.js` |
+| Aceptación y usabilidad | Que un comerciante logre sus tareas sin ayuda | Pruebas guiadas con usuarios | Sección 6 |
+
+## 3. Entorno
+
+- **Pruebas automáticas:** Node.js 22.13 o superior; base de datos SQLite en memoria con el mismo `database/schema.sql` que usa MySQL.
+- **Prueba de humo:** API real con MySQL 8 (local o con Docker).
+- **Aceptación:** celular y computador con la app instalada o abierta en el navegador.
+
+## 4. Criterios
+
+- **Entrada:** historia terminada según la Definition of Done y código subido a GitHub.
+- **Salida (para entregar):** 100 % de las pruebas automáticas aprobadas, prueba de humo aprobada y ningún defecto crítico abierto.
+
+## 5. Pruebas automáticas y resultados
+
+| Archivo | Qué prueba | Pruebas |
+|---|---|---|
+| `usuarios.test.js` | Registro, correo único, contraseña con hash, inicio de sesión | 6 |
+| `productos.test.js` | Crear, editar, filtrar, eliminar, stock, aislamiento entre cuentas | 10 |
+| `ventas.test.js` | Venta, descuento de stock, "todo o nada", anulación, historial, ganancia | 11 |
+| `estadisticas.test.js` | Resumen, tendencia, ventas por día/semana/mes, más y menos vendidos, inversión | 11 |
+| `asistente.test.js` | Respuestas con reglas, IA simulada, falla del proveedor | 6 |
+| `seguridad.test.js` | Inyección SQL, hashes, límites, errores | 10 |
+| `rendimiento.test.js` | Consultas con un negocio grande | 9 |
+| `token.test.js` | Sesiones JWT (manipulado, vencido, sin firma) | 6 |
+| **Total** | | **69** |
+
+**Resultados**
+
+| Ejecución | Resultado |
+|---|---|
+| `npm test` con las 44 pruebas iniciales (usuarios, productos, ventas, estadísticas, asistente) | Aprobadas en el computador del equipo |
+| `npm run smoke` contra MySQL real | Aprobada en el computador del equipo |
+| `npm test` con las 63 pruebas (más seguridad y rendimiento), ejecutado al preparar este documento | 63 de 63 aprobadas |
+| Pruebas de sesiones JWT (6) | Se ejecutan al instalar las dependencias (`npm install`); **pendiente de registrar el resultado** |
+
+**Tiempos medidos** (entorno de desarrollo, SQLite en memoria; con MySQL real serán mayores y deben volver a medirse al publicar)
+
+| Consulta | Tiempo | Meta |
+|---|---|---|
+| Listar 1.000 productos | 5 ms | < 500 ms |
+| Resumen del panel a 30 y 90 días (5.000 ventas) | 6 y 9 ms | < 1 s |
+| Ventas por día, semana y mes | 7 a 8 ms | < 1 s |
+| Más vendidos / más ganancia / menos vendidos | 13 / 8 / 7 ms | < 1 s |
+| Asistente (arma todo el contexto del negocio) | 39 ms | < 3 s |
+| Registrar una venta (promedio de 200) | 0,3 ms | < 100 ms |
+
+## 6. Pruebas de aceptación y usabilidad (con personas)
+
+**Estado: pendiente de ejecutar con comerciantes reales** (historia HU-32). Procedimiento:
+
+1. Reclutar al menos 5 personas (comerciantes o personas cercanas que usen el celular), sin explicarles la app antes.
+2. Darles estas tareas, una por una, y anotar si la logran, cuánto tardan y dónde se confunden:
+
+| Tarea | Éxito esperado | Tiempo meta |
+|---|---|---|
+| T1. Crear una cuenta y entrar | Lo logra sin ayuda | 1 min |
+| T2. Agregar un producto con su precio de compra y de venta | Entiende cuál es cada precio | 1 min |
+| T3. Registrar una venta de 2 productos | Lo logra en 4 pasos o menos | 30 s |
+| T4. Averiguar cuánto ganó esta semana | Encuentra el dato en el panel | 30 s |
+| T5. Anular una venta equivocada | Encuentra el botón | 30 s |
+| T6. Preguntarle algo al asistente | Obtiene una respuesta útil | 30 s |
+
+3. Al final, preguntarles de 1 a 5: qué tan fácil fue, qué tan claro el lenguaje, y si la usarían en su negocio.
+4. Registrar los resultados en una tabla (persona, tarea, éxito, tiempo, comentarios) y convertir los problemas en historias del Product Backlog.
+
+## 7. Casos de prueba manuales de la interfaz
+
+| ID | Caso | Resultado esperado |
+|---|---|---|
+| M-01 | Crear cuenta con un correo nuevo | Entra a la app con el inventario vacío |
+| M-02 | Iniciar sesión con contraseña incorrecta | Mensaje "Correo o contraseña incorrectos" |
+| M-03 | Agregar producto con compra $3.000 y venta $5.000 | Se ve "Ganas $2.000 c/u" |
+| M-04 | Vender 3 unidades de un producto con 10 | Stock queda en 7; aviso con la ganancia |
+| M-05 | Intentar vender más de lo que hay (con el stock desactualizado desde otra pestaña) | Mensaje de stock insuficiente; la pantalla se actualiza |
+| M-06 | Anular la venta | Se ve tachada, no suma y el stock vuelve |
+| M-07 | Recargar la página y entrar desde otro navegador | Se ven los mismos datos |
+| M-08 | Abrir el panel | Se dibujan los 3 gráficos y las alertas de stock |
+| M-09 | Preguntar "¿Cuánto gané esta semana?" | Respuesta con las cifras reales |
+| M-10 | Instalar la app en el celular | Aparece el ícono y abre como aplicación |
+
+*Estado: ejecutados durante el desarrollo; el equipo debe registrar la fecha y el resultado final antes de la entrega.*
+
+## 8. Matriz de trazabilidad (historias → pruebas)
+
+| Historia | Pruebas |
+|---|---|
+| HU-01, HU-02 (cuentas) | `usuarios.test.js`, `token.test.js`, `seguridad.test.js`, M-01, M-02 |
+| HU-05 a HU-09 (inventario) | `productos.test.js`, M-03 |
+| HU-11 a HU-15 (ventas) | `ventas.test.js`, M-04, M-05, M-06 |
+| HU-17 a HU-23 (panel) | `estadisticas.test.js`, `rendimiento.test.js`, M-08 |
+| HU-24, HU-25 (asistente) | `asistente.test.js`, M-09 |
+| HU-31 (calidad) | todas las pruebas automáticas |
+
+## 9. Defectos encontrados y corregidos
+
+| N.º | Defecto | Cómo se encontró | Corrección |
+|---|---|---|---|
+| D1 | El inicio de sesión fallaba para todos si había una cuenta guardada por una versión anterior ("toLowerCase de undefined") | Prueba manual en Chrome | Se ignoran los registros inválidos |
+| D2 | La app instalable mostraba una versión vieja guardada en la caché | Prueba manual | La página se pide siempre al servidor primero |
+| D3 | Los datos de la API podían quedar en la caché del navegador | Revisión al conectar con el backend | Las respuestas de la API nunca se guardan en caché |
+| D4 | La fecha de "hoy" usaba la hora UTC y de noche daba el día siguiente | Revisión del código | Se usa la hora local / la zona horaria de Chile |
+| D5 | Un hash de contraseña dañado (`scrypt$zz$zz`) se aceptaba como contraseña correcta | **Prueba automática de seguridad** | Se valida el formato y el largo del hash |
+| D6 | El asistente no entendía "¿Qué producto se vende menos?" | Prueba automática del asistente | Se ampliaron las frases reconocidas |
+| D7 | Error intermitente `ECONNRESET` del servidor de desarrollo al registrarse | Prueba manual | Configuración del proxy más robusta |
+| D8 | Tras un rechazo por falta de stock la pantalla seguía mostrando datos viejos | Prueba de punta a punta con dos pestañas | Se actualiza automáticamente tras el rechazo |
+
+## 10. Pendientes
+
+- Pruebas de usabilidad con comerciantes reales (sección 6).
+- Medir el rendimiento y el tiempo de carga de la app con MySQL y red reales, una vez publicada.
+- Pruebas en iPhone/Safari.
+- Registrar el resultado de las pruebas de sesiones JWT.

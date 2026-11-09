@@ -1,123 +1,54 @@
-# Product Vision --- Vendix
+# Visión del producto — Vendix
 
-**Sistema de gestión de ventas e inventario para vendedores ambulantes y
-pequeñas empresas**\
-Proyecto APT --- Ingeniería en Informática, Duoc UC, sede Valparaíso.\
-Versión 1.0 · Estado: propuesta de visión del producto
+**Versión 2.0 · Actualizado: noviembre de 2026**
 
-## 1. Identificación del producto
+## Declaración de visión
 
-**Nombre:** Vendix
+> **Para** vendedores ambulantes y dueños de pequeños negocios en Chile
+> **que** llevan sus ventas y su inventario en cuadernos, planillas o de memoria,
+> **Vendix** es una **aplicación web instalable en el celular**
+> **que** permite registrar productos y ventas en pocos toques, saber cuánto invierten y cuánto ganan, y recibir recomendaciones simples.
+> **A diferencia de** las planillas y de los sistemas de punto de venta pensados para tiendas formales,
+> **nuestro producto** está diseñado para personas sin conocimientos técnicos, funciona desde el celular y explica los números en lenguaje cotidiano.
 
-**Tipo de solución:** Sistema de gestión de ventas e inventario con
-apoyo de herramientas inteligentes.
+## Problema que resuelve
 
-**Contexto:** Proyecto APT de Ingeniería en Informática, Duoc UC, sede
-Valparaíso.
+Los comerciantes pequeños no tienen una forma simple de saber qué se está acabando, qué se vende más y cuánto ganan de verdad.
+Ver Documento de inicio (`Documento_Inicio_Proyecto_Vendix.md`).
 
-**Equipo:** Esteban Guajardo (frontend y UX/UI), Kevin Godoy (backend y
-bases de datos) y Daniel Troncoso (liderazgo técnico y componente de
-IA).
+## Usuarios de referencia (personas ficticias)
 
-## 2. Problema o necesidad
+| Persona | Situación | Qué necesita |
+|---|---|---|
+| Carmen, vende ropa y accesorios en una feria | Anota todo en un cuaderno, vende desde el celular | Registrar una venta en segundos y saber qué reponer antes del fin de semana |
+| Beto, dueño de un almacén de barrio | Usa una planilla que casi no mira | Ver su ganancia por producto y los días que más vende |
 
-**Problema identificado:** Los vendedores ambulantes y las pequeñas
-empresas necesitan una forma accesible de mantener ordenados sus
-productos, ventas y existencias. Llevar estos registros manualmente o en
-herramientas separadas puede dificultar la consulta del stock y el
-seguimiento de las ventas.
+## Propuesta de valor
 
-**Necesidad:** Contar con una herramienta centralizada que facilite el
-registro y la consulta de información básica del negocio.
+1. **Simple:** pocas pantallas, botones grandes, lenguaje cotidiano.
+2. **Útil desde el primer día:** la ganancia por producto y por venta se ve al instante.
+3. **Decide por ti:** alertas de stock bajo y un asistente que responde con tus datos.
+4. **En el celular:** se instala como una app y se usa en la calle.
+5. **Tus datos son tuyos:** cada cuenta ve solo lo suyo; se puede entrar desde cualquier dispositivo.
 
-## 3. Público objetivo
+## Estado actual del producto
 
-**Usuarios principales:** Vendedores ambulantes y responsables de
-pequeñas empresas que necesitan controlar sus productos, inventario y
-ventas.
+| Capacidad | Estado |
+|---|---|
+| Cuentas, inventario, ventas, anulación | Funcionando (frontend + API + MySQL) |
+| Panel con inversión y ganancia | Funcionando |
+| Asistente con reglas | Funcionando; IA externa lista para activar con una clave |
+| App instalable (PWA) | Funcionando |
+| Publicación en internet | Pendiente (Sprint 5) |
+| Pruebas con usuarios reales | Pendiente (Sprint 4–5) |
 
-**Necesidades de los usuarios:** Registrar productos, consultar
-existencias, registrar ventas y revisar información que ayude a
-comprender el movimiento del negocio.
+## Indicadores para medir el éxito
 
-## 4. Visión del producto
+- Tiempo para registrar una venta: menos de 30 segundos y 4 pasos o menos.
+- Usuarios de prueba que logran registrar una venta sin ayuda: 80 % o más.
+- Satisfacción de los usuarios de prueba: 4 de 5 o más.
+- Pruebas automáticas aprobadas: 100 %.
 
-**Declaración de visión:** Para vendedores ambulantes y pequeñas
-empresas que necesitan ordenar su operación diaria, Vendix es un sistema
-de gestión de ventas e inventario que centraliza productos, existencias
-y ventas, y busca facilitar la toma de decisiones mediante estadísticas
-y un asistente inteligente. A diferencia de llevar registros dispersos o
-manuales, Vendix propone una interfaz centralizada y una arquitectura
-que permite ampliar sus funcionalidades de forma progresiva.
+## Equipo
 
-## 5. Propuesta de valor
-
-**Valor principal:** Facilitar la administración cotidiana del negocio
-mediante una vista centralizada de productos, ventas e inventario.
-
-**Beneficios esperados:** Reducir la dispersión de registros, hacer más
-sencilla la consulta de existencias, apoyar el seguimiento de las ventas
-y ofrecer información resumida para orientar decisiones.
-
-## 6. Objetivos del producto
-
-**Objetivo general:** Desarrollar un sistema accesible para apoyar la
-gestión de ventas e inventario de vendedores ambulantes y pequeñas
-empresas.
-
-**Objetivos específicos:** Permitir la gestión de productos; facilitar
-el registro y consulta de ventas; mantener información de existencias;
-presentar estadísticas o reportes; y explorar un asistente inteligente
-para consultas relacionadas con el negocio.
-
-## 7. Alcance funcional
-
-**Módulos contemplados:** Inicio de sesión; productos; ventas;
-inventario; reportes y estadísticas; asistente inteligente.
-
-**Límite del alcance:** La inclusión de un módulo en la visión no
-significa que esté terminado ni integrado. El estado debe verificarse en
-el código, mediante pruebas y en la integración frontend-backend.
-
-## 8. Criterios de éxito propuestos
-
-**Usabilidad:** Un usuario puede completar los flujos principales sin
-instrucciones extensas y con mensajes claros ante errores.
-
-**Integridad de datos:** Las operaciones confirmadas de venta y producto
-se reflejan correctamente en la base de datos.
-
-**Integración:** El frontend utiliza la API configurada y presenta de
-forma coherente las respuestas del backend.
-
-**Verificación:** Las pruebas documentadas se ejecutan y sus resultados
-quedan registrados.
-
-**Mantenibilidad:** La documentación de instalación, API, modelo de
-datos y pruebas se mantiene alineada con el código.
-
-## 9. Fuera de alcance o pendiente de confirmar
-
-**No asumir como terminado:** La integración completa entre frontend y
-backend; la publicación en un servidor de producción; la disponibilidad
-permanente de un proveedor externo de IA; y la aprobación de todas las
-pruebas.
-
-**Nota:** Estos puntos deben confirmarse con el equipo y con la pauta de
-evaluación antes de presentarlos como compromisos definitivos.
-
-## 10. Equipo y responsabilidades
-
-**Esteban Guajardo:** Frontend y experiencia de usuario (UX/UI).
-
-**Kevin Godoy:** Backend y bases de datos.
-
-**Daniel Troncoso:** Liderazgo técnico y componente de inteligencia
-artificial.
-
-## 11. Relación con Scrum
-
-**Uso:** La visión orienta la priorización del Product Backlog y del
-Sprint Backlog. Las historias de usuario se deben ordenar según el valor
-para los usuarios y la viabilidad técnica, y su estado debe reflejar el
-avance real del equipo.
+Daniel Troncoso y Esteban Guajardo. (Kevin Godoy participó en la Fase 1 y dejó el equipo durante la Fase 2.)
