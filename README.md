@@ -1,158 +1,85 @@
-# Proyecto-Capstone
+# Vendix — Frontend (aplicación web instalable)
 
-# Vendix --- Sistema de gestión de ventas e inventario
+**Proyecto APT (Capstone) · Ingeniería en Informática · Duoc UC Valparaíso**
 
-Vendix es un proyecto académico desarrollado para el Proyecto APT de
-Ingeniería en Informática de Duoc UC, sede Valparaíso. Su propósito es
-apoyar a vendedores ambulantes y pequeñas empresas en la administración
-de productos, inventario y ventas.
+## Descripción
 
-> **Estado del proyecto:** este repositorio contiene documentación y
-> código de frontend y backend en desarrollo. La disponibilidad de cada
-> función y la integración entre ambos componentes debe confirmarse
-> ejecutando la aplicación. No se debe interpretar una función descrita
-> como objetivo como una función ya integrada y validada.
+**Vendix** es un sistema de gestión de ventas e inventario para **vendedores ambulantes y pequeños negocios** en Chile. Este repositorio contiene el
+**frontend**: la aplicación que usa el comerciante, pensada para el celular y **instalable** como una app (PWA). Permite crear una cuenta, administrar
+productos con su precio de compra y de venta, registrar y anular ventas, ver el panel con la inversión y la ganancia, preguntarle al asistente y exportar reportes.
 
-## Objetivo
+El backend (API y base de datos) está en [Proyecto-Capstone-backend](https://github.com/danieldelta93/Proyecto-Capstone-backend).
 
-Desarrollar una aplicación que facilite el registro y seguimiento de
-productos, ventas y existencias, y que entregue información útil para
-apoyar la gestión cotidiana del negocio.
+## Tecnologías
 
-## Funcionalidades contempladas
+| Parte | Tecnología |
+|---|---|
+| Interfaz | React 18 + Vite 5, CSS propio por componente |
+| Gráficos | Chart.js 4 |
+| App instalable | PWA (manifest y service worker) |
+| Comunicación | API REST con el backend (token JWT) |
+| Backend (otro repo) | Node.js, Express, MySQL |
 
--   Inicio de sesión y gestión de cuentas.
--   Administración de productos y precios.
--   Registro de ventas y actualización de existencias.
--   Visualización de estadísticas y reportes.
--   Alertas relacionadas con el inventario.
--   Asistente para consultas sobre los datos del negocio.
+## Arquitectura
 
-La implementación y el estado de integración de cada módulo deben
-verificarse en el código y mediante pruebas.
+![Arquitectura de Vendix](Documentacion/img/arquitectura.png)
 
-## Arquitectura prevista
+La app (`src/components/`) pide y guarda todo en el backend a través de `src/api/`. Las contraseñas nunca quedan en el navegador: solo un token de sesión.
+Diagrama de componentes y demás diagramas UML: [`Documentacion/Diagramas_UML_Vendix.md`](Documentacion/Diagramas_UML_Vendix.md).
 
--   **Frontend:** React y Vite.
--   **Backend:** Node.js y Express, mediante una API REST.
--   **Base de datos:** MySQL.
--   **Asistente:** integración opcional con un proveedor compatible con
-    la API de chat completions; el backend contempla respuestas basadas
-    en reglas cuando no se configura una clave de IA.
+## Ejecución local (paso a paso)
 
-Flujo general:
+Necesitas [Node.js](https://nodejs.org/) 18 o superior y **el backend encendido** (ver el README del repositorio del backend).
 
-`Usuario → Frontend React → API REST (Express) → MySQL`
-
-El asistente puede utilizar el servicio de IA cuando se configure y
-habilite esa integración.
-
-## Estructura del repositorio
-
-La estructura puede variar según cómo esté organizado el repositorio
-final. En el proyecto se han utilizado carpetas para el código y para
-las entregas académicas, por ejemplo:
-
-``` text
-/
-├── Codigo/                 # Frontend (si así está organizado el repositorio principal)
-├── FASE 1/                 # Evidencias y documentos de la primera fase
-├── FASE 2/                 # Evidencias y documentos de la segunda fase
-├── FASE 3/                 # Evidencias y documentos de la tercera fase
-└── README.md               # Presentación general del proyecto
-```
-
-El backend se mantiene también en un repositorio/carpeta separado. Su
-estructura y pasos de ejecución están descritos en el README específico
-del backend.
-
-## Requisitos generales
-
--   Node.js compatible con la versión requerida por cada componente.
--   MySQL 8 para el backend.
--   Git.
--   Un navegador moderno.
--   (Opcional) Docker, si se desea levantar MySQL mediante el
-    `docker-compose.yml` del backend.
-
-Consulta el README de cada componente para ver los requisitos exactos y
-sus comandos.
-
-## Ejecución
-
-### Frontend
-
-Desde la carpeta que contiene el `package.json` del frontend:
-
-``` bash
+```bash
+# 1. Enciende el backend (en otra terminal):  http://localhost:3000/api/salud debe responder
+# 2. Descarga e inicia el frontend
+git clone https://github.com/danieldelta93/Proyecto-Capstone-frontend.git
+cd Proyecto-Capstone-frontend/Codigo
 npm install
 npm run dev
+# 3. Abre http://localhost:5173, crea tu cuenta y empieza a usarla
 ```
 
-Estos comandos son los habituales en el proyecto React/Vite. Si los
-scripts de `package.json` son diferentes, utiliza los que estén
-definidos allí. Vite normalmente muestra en la terminal la dirección
-local que se debe abrir en el navegador.
+En desarrollo, Vite reenvía las llamadas `/api` a `http://localhost:3000`, así que no hay que configurar nada más.
+Para publicar la app se define `VITE_API_URL` (ver `Codigo/.env.example`) y se ejecuta `npm run build`.
+Instalación en el celular, publicación y solución de problemas: [`Documentacion/Manual_Tecnico_Vendix.md`](Documentacion/Manual_Tecnico_Vendix.md).
 
-### Backend
+## Equipo y roles
 
-Sigue las instrucciones de instalación, configuración de `.env`,
-preparación de MySQL y arranque del servidor que aparecen en el README
-del backend. No basta con iniciar el frontend para confirmar que la API
-y la base de datos están conectadas.
+| Integrante | Rol |
+|---|---|
+| Esteban Guajardo | Frontend, diseño de interfaz (UX/UI) y pruebas de usabilidad |
+| Daniel Troncoso | Líder técnico; backend, base de datos, asistente de IA y despliegue |
 
-## Variables de entorno y seguridad
-
--   No subas archivos `.env` con contraseñas, claves JWT ni claves de
-    proveedores de IA.
--   Usa `.env.example` como referencia para configurar el backend.
--   Cambia los valores de ejemplo por secretos propios y no compartas
-    esos secretos en capturas o documentos.
--   La autenticación de demostración del frontend, si todavía se utiliza
-    de forma aislada, no debe considerarse equivalente a la
-    autenticación segura del backend hasta que la integración haya sido
-    comprobada.
-
-## Pruebas y verificación
-
-Antes de presentar una versión como funcional:
-
-1.  Instala las dependencias de frontend y backend.
-2.  Configura y comprueba la base de datos.
-3.  Ejecuta las pruebas automáticas disponibles en el backend.
-4.  Ejecuta el script de prueba de humo del backend.
-5.  Comprueba desde el navegador los flujos principales.
-6.  Verifica que las operaciones realizadas en la interfaz se reflejen
-    correctamente en la API y en la base de datos.
-
-Consulta la documentación de pruebas que acompaña al backend. No marques
-las pruebas como aprobadas sin ejecutarlas y registrar sus resultados.
-
-## Equipo
-
--   **Esteban Guajardo:** desarrollo frontend,  backend y  experiencia de usuario
-    (UX/UI).
--   **Daniel Troncoso:** liderazgo técnico ,  bases de datos y componente de inteligencia
-    artificial.
+Kevin Godoy participó en la Fase 1 (backend y base de datos) y dejó el equipo durante la Fase 2.
 
 ## Metodología
 
-El proyecto se organiza utilizando Scrum, con trabajo dividido en tareas
-y entregas iterativas. El estado de cada historia o tarea debe
-mantenerse actualizado en el tablero o Sprint Backlog del equipo.
+**Scrum**, en sprints de dos semanas: los requerimientos de usuarios no técnicos se descubren probando el producto, el equipo es pequeño y cada fase del
+curso pide un avance que funcione. Artefactos: Product Backlog, Sprint Backlog, Definition of Done y retrospectivas.
+Detalle y justificación: [`Documentacion/Metodologia_Scrum_Vendix.md`](Documentacion/Metodologia_Scrum_Vendix.md).
 
-## Documentación relacionada
+## Documentación
 
--   README específico del backend: instalación, variables de entorno,
-    base de datos y pruebas.
--   `docs/API.md`: rutas y contratos de la API del backend.
--   `docs/ARQUITECTURA.md`: organización técnica del backend.
--   `docs/MODELO_DE_DATOS.md`: tablas y relaciones de la base de datos.
--   `docs/pruebas.http`: solicitudes manuales para verificar endpoints.
+| Documento | |
+|---|---|
+| [Documento de inicio](Documentacion/Documento_Inicio_Proyecto_Vendix.md) | Objetivos, alcance MVP, restricciones, riesgos |
+| [Visión del producto](Documentacion/Product_Vision_Vendix.md) · [Product Backlog](Documentacion/Product_Backlog_Vendix.md) · [Sprint Backlog](Documentacion/Sprint_Backlog_Vendix.md) | Artefactos Scrum |
+| [Definition of Done](Documentacion/Definition_of_Done_Vendix.md) · [Retrospectivas](Documentacion/Retrospectivas_Vendix.md) | Calidad y mejora continua |
+| [Requisitos no funcionales](Documentacion/Requisitos_No_Funcionales_Vendix.md) | Rendimiento, seguridad, usabilidad |
+| [Diagramas UML](Documentacion/Diagramas_UML_Vendix.md) · [Plan de pruebas](Documentacion/Plan_Pruebas_Vendix.md) | Diseño y pruebas |
+| [Manual técnico](Documentacion/Manual_Tecnico_Vendix.md) · [Innovación](Documentacion/Innovacion_Vendix.md) | |
 
-Las rutas anteriores corresponden a la carpeta `docs/` del backend.
+## Estructura del repositorio
 
-## Licencia y uso
+```
+Codigo/            la aplicación (src/, public/, package.json)
+Documentacion/     documentos del proyecto (Markdown y Word) e imágenes de los diagramas
+FASE 1/ FASE 2/ FASE 3/   evidencias de cada fase del curso
+```
 
-Proyecto académico de uso educativo. No se ha definido una licencia de
-distribución en este README.
+## Estado del proyecto
+
+Aplicación funcionando y conectada al backend. Pendientes: publicación en internet, pantallas de reposición de stock y de "menos vendidos", y pruebas de
+usabilidad con comerciantes reales. Ver [Sprint Backlog](Documentacion/Sprint_Backlog_Vendix.md).
