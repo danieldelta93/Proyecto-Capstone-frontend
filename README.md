@@ -52,7 +52,7 @@ Instalación en el celular, publicación y solución de problemas: [`Documentaci
 | Esteban Guajardo | Frontend, diseño de interfaz (UX/UI) y pruebas de usabilidad |
 | Daniel Troncoso | Líder técnico; backend, base de datos, asistente de IA y despliegue |
 
-Kevin Godoy participó en la Fase 1 (backend y base de datos) y dejó el equipo durante la Fase 2.
+
 
 ## Metodología
 
