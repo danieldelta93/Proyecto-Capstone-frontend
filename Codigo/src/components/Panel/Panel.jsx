@@ -1,16 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import { api } from "../../api/api.js";
-import { fmtCLP } from "../../utils/format.js";
+import { fmtCLP, daysAgoISO } from "../../utils/format.js";
 import { IconAlert } from "../Icons/Icons.jsx";
 import "./Panel.css";
 
 const etiquetaFecha = (d) =>
-  new Date(d + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "short" });
+  new Date(d + "T12:00:00").toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "short",
+  });
 
-// Los números del panel los calcula el servidor con consultas SQL (ventas por día, más vendidos,
-// inversión y ganancia, alertas de stock). `productos` y `ventas` llegan solo para saber cuándo
-// hubo cambios y volver a pedir los datos.
+const fechaLegible = (fecha) => {
+  if (!fecha) return "Fecha no disponible";
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString("es-CL", {
+    day: "numeric",
+    month: "short",
+  });
+};
+
 export default function Panel({ productos, ventas }) {
   const [rango, setRango] = useState(7);
   const [datos, setDatos] = useState(null);
@@ -20,21 +28,58 @@ export default function Panel({ productos, ventas }) {
   const finBarRef = useRef(null);
   const graficos = useRef([]);
 
+  const ventasActivas = useMemo(
+    () => ventas.filter((venta) => venta.estado !== "anulada"),
+    [ventas]
+  );
+
+  const resumenHoy = useMemo(() => {
+    const hoy = daysAgoISO(0);
+    const delDia = ventasActivas.filter((venta) => venta.fecha === hoy);
+    const ingresos = delDia.reduce((total, venta) => total + Number(venta.total || 0), 0);
+    const ventasConGanancia = delDia.filter((venta) => venta.ganancia !== null && venta.ganancia !== undefined);
+    const ganancia = ventasConGanancia.reduce((total, venta) => total + Number(venta.ganancia || 0), 0);
+    return {
+      cantidad: delDia.length,
+      ingresos,
+      ganancia,
+      tieneGanancia: ventasConGanancia.length > 0,
+    };
+  }, [ventasActivas]);
+
+  const ventasRecientes = useMemo(
+    () => [...ventasActivas].sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)) || Number(b.id) - Number(a.id)).slice(0, 5),
+    [ventasActivas]
+  );
+
+  const productosBajoStock = useMemo(
+    () => productos.filter((producto) => Number(producto.stock) <= Number(producto.stockMin)),
+    [productos]
+  );
+
   useEffect(() => {
     let vigente = true;
     setError("");
-    Promise.all([api.resumen(rango), api.ventasPorDia(rango), api.masVendidos(rango, 5), api.stockBajo(), api.valorInventario()])
+
+    Promise.all([
+      api.resumen(rango),
+      api.ventasPorDia(rango),
+      api.masVendidos(rango, 5),
+      api.stockBajo(),
+      api.valorInventario(),
+    ])
       .then(([resumen, porDia, top, bajo, inventario]) => {
         if (vigente) setDatos({ resumen, porDia, top, bajo, inventario });
       })
       .catch((e) => vigente && setError(e.message));
+
     return () => {
       vigente = false;
     };
   }, [rango, productos, ventas]);
 
   useEffect(() => {
-    graficos.current.forEach((g) => g.destroy());
+    graficos.current.forEach((grafico) => grafico.destroy());
     graficos.current = [];
     if (!datos) return;
 
@@ -45,64 +90,88 @@ export default function Panel({ productos, ventas }) {
     const line = styles.getPropertyValue("--line").trim();
     const inkSoft = styles.getPropertyValue("--ink-soft").trim();
     const labels = datos.porDia.map((d) => etiquetaFecha(d.fecha));
-    const ejeX = { grid: { display: false }, ticks: { color: ink, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 } };
-    const ejeY = { grid: { color: line }, ticks: { color: ink, font: { size: 10 } } };
+    const ejeX = {
+      grid: { display: false },
+      ticks: { color: ink, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 },
+    };
+    const ejeY = {
+      grid: { color: line },
+      ticks: { color: ink, font: { size: 10 } },
+    };
     const pesos = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("es-CL");
 
-    // Ventas por día: barras verticales
     if (diasBarRef.current) {
-      graficos.current.push(
-        new Chart(diasBarRef.current, {
-          type: "bar",
-          data: { labels, datasets: [{ data: datos.porDia.map((d) => d.total), backgroundColor: accent, borderRadius: 6, maxBarThickness: 28 }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: ejeX, y: ejeY } },
-        })
-      );
+      graficos.current.push(new Chart(diasBarRef.current, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "Ventas",
+            data: datos.porDia.map((d) => d.total),
+            backgroundColor: accent,
+            borderRadius: 7,
+            maxBarThickness: 30,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: ejeX, y: ejeY },
+        },
+      }));
     }
 
-    // Inversión y ganancia: barras apiladas (invertido + ganancia = lo vendido)
     if (finBarRef.current) {
-      graficos.current.push(
-        new Chart(finBarRef.current, {
-          type: "bar",
-          data: {
-            labels,
-            datasets: [
-              { label: "Invertido", data: datos.porDia.map((d) => d.invertido), backgroundColor: inkSoft, maxBarThickness: 28 },
-              { label: "Ganancia", data: datos.porDia.map((d) => d.ganancia), backgroundColor: primary, maxBarThickness: 28 },
-            ],
+      graficos.current.push(new Chart(finBarRef.current, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Invertido", data: datos.porDia.map((d) => d.invertido), backgroundColor: inkSoft, borderRadius: 4, maxBarThickness: 30 },
+            { label: "Ganancia", data: datos.porDia.map((d) => d.ganancia), backgroundColor: primary, borderRadius: 4, maxBarThickness: 30 },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: "bottom", labels: { color: ink, boxWidth: 12, font: { size: 11 } } },
+            tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${pesos(c.parsed.y)}` } },
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: true, position: "bottom", labels: { color: ink, boxWidth: 12, font: { size: 11 } } },
-              tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${pesos(c.parsed.y)}` } },
-            },
-            scales: { x: { ...ejeX, stacked: true }, y: { ...ejeY, stacked: true } },
-          },
-        })
-      );
+          scales: { x: { ...ejeX, stacked: true }, y: { ...ejeY, stacked: true } },
+        },
+      }));
     }
 
-    // Productos más vendidos: barras horizontales
-    if (topBarRef.current) {
-      graficos.current.push(
-        new Chart(topBarRef.current, {
-          type: "bar",
-          data: { labels: datos.top.map((t) => t.nombre), datasets: [{ data: datos.top.map((t) => t.cantidad), backgroundColor: primary, borderRadius: 6, maxBarThickness: 22 }] },
-          options: {
-            indexAxis: "y",
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { grid: { color: line }, ticks: { color: ink, font: { size: 10 } } }, y: { grid: { display: false }, ticks: { color: ink, font: { size: 11 } } } },
+    if (topBarRef.current && datos.top.length > 0) {
+      graficos.current.push(new Chart(topBarRef.current, {
+        type: "bar",
+        data: {
+          labels: datos.top.map((t) => t.nombre),
+          datasets: [{
+            label: "Unidades",
+            data: datos.top.map((t) => t.cantidad),
+            backgroundColor: primary,
+            borderRadius: 7,
+            maxBarThickness: 24,
+          }],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: line }, ticks: { color: ink, font: { size: 10 } } },
+            y: { grid: { display: false }, ticks: { color: ink, font: { size: 11 } } },
           },
-        })
-      );
+        },
+      }));
     }
+
     return () => {
-      graficos.current.forEach((g) => g.destroy());
+      graficos.current.forEach((grafico) => grafico.destroy());
       graficos.current = [];
     };
   }, [datos]);
@@ -114,127 +183,180 @@ export default function Panel({ productos, ventas }) {
     cuerpo = <p className="empty">⏳ Calculando tu panel…</p>;
   } else {
     const { resumen: r, top, bajo, inventario } = datos;
-    const hayFin = r.margenPct !== null; // hay ventas con precio de compra conocido
-    const v = r.variacionIngresosPct;
+    const hayFin = r.margenPct !== null;
+    const variacion = r.variacionIngresosPct;
+
     cuerpo = (
       <>
-        <div className="stat-grid">
-          <div className="stat-card">
-            <p className="label">Ventas del período</p>
-            <p className="num">{fmtCLP(r.ingresos)}</p>
-            {v !== null && (
-              <p className={"variacion " + (v >= 0 ? "sube" : "baja")}>
-                {v >= 0 ? "▲" : "▼"} {Math.abs(v)}% vs período anterior
-              </p>
-            )}
+        <section className="panel-seccion">
+          <div className="panel-seccion-titulo">
+            <div>
+              <p className="panel-eyebrow">RESUMEN DEL PERÍODO</p>
+              <h3>Así va tu negocio</h3>
+            </div>
+            <div className="panel-rangos" aria-label="Período de análisis">
+              {[7, 14, 30].map((n) => (
+                <button key={n} className={rango === n ? "active" : ""} onClick={() => setRango(n)}>
+                  {n} días
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="stat-card">
-            <p className="label">Ticket promedio</p>
-            <p className="num">{fmtCLP(r.ticketPromedio)}</p>
-          </div>
-          <div className="stat-card">
-            <p className="label">Producto estrella</p>
-            <p className="num small">{top[0]?.nombre ?? "—"}</p>
-          </div>
-          <div className="stat-card">
-            <p className="label">Ventas registradas</p>
-            <p className="num">{r.ventas}</p>
-          </div>
-        </div>
 
-        <div className="chart-wrap">
-          <h4>Ventas por día</h4>
-          <div className="chart-canvas-box">
-            <canvas ref={diasBarRef}></canvas>
+          <div className="stat-grid">
+            <article className="stat-card">
+              <span className="stat-icon">↗</span>
+              <p className="label">Ventas del período</p>
+              <p className="num">{fmtCLP(r.ingresos)}</p>
+              {variacion !== null && (
+                <p className={`variacion ${variacion >= 0 ? "sube" : "baja"}`}>
+                  {variacion >= 0 ? "▲" : "▼"} {Math.abs(variacion)}% vs período anterior
+                </p>
+              )}
+            </article>
+            <article className="stat-card">
+              <span className="stat-icon">◷</span>
+              <p className="label">Ticket promedio</p>
+              <p className="num">{fmtCLP(r.ticketPromedio)}</p>
+              <p className="stat-ayuda">Por venta registrada</p>
+            </article>
+            <article className="stat-card">
+              <span className="stat-icon">★</span>
+              <p className="label">Producto estrella</p>
+              <p className="num small">{top[0]?.nombre ?? "—"}</p>
+              <p className="stat-ayuda">Más vendido en el período</p>
+            </article>
+            <article className="stat-card">
+              <span className="stat-icon">▤</span>
+              <p className="label">Ventas registradas</p>
+              <p className="num">{r.ventas}</p>
+              <p className="stat-ayuda">Operaciones completadas</p>
+            </article>
           </div>
-        </div>
+        </section>
 
-        <div className="chart-wrap">
-          <h4>Inversión y ganancia</h4>
+        <section className="panel-seccion panel-hoy">
+          <div className="panel-seccion-titulo">
+            <div>
+              <p className="panel-eyebrow">MOVIMIENTO DEL DÍA</p>
+              <h3>Hoy en tu negocio</h3>
+            </div>
+            <span className="panel-hoy-fecha">{new Date().toLocaleDateString("es-CL", { day: "numeric", month: "short" })}</span>
+          </div>
+          <div className="panel-hoy-grid">
+            <div className="panel-hoy-item">
+              <span>Ingresos de hoy</span>
+              <strong>{fmtCLP(resumenHoy.ingresos)}</strong>
+            </div>
+            <div className="panel-hoy-item">
+              <span>Ventas de hoy</span>
+              <strong>{resumenHoy.cantidad}</strong>
+            </div>
+            <div className="panel-hoy-item">
+              <span>Ganancia estimada</span>
+              <strong>{resumenHoy.tieneGanancia ? fmtCLP(resumenHoy.ganancia) : "—"}</strong>
+            </div>
+          </div>
+          {!resumenHoy.tieneGanancia && resumenHoy.cantidad > 0 && (
+            <p className="panel-nota">No hay costos registrados para calcular la ganancia de todas las ventas de hoy.</p>
+          )}
+        </section>
+
+        <section className="chart-wrap">
+          <div className="panel-chart-heading">
+            <div><p className="panel-eyebrow">TENDENCIA</p><h4>Ventas por día</h4></div>
+            <span className="panel-chart-caption">Ingresos en el período</span>
+          </div>
+          <div className="chart-canvas-box"><canvas ref={diasBarRef}></canvas></div>
+        </section>
+
+        <section className="chart-wrap">
+          <div className="panel-chart-heading">
+            <div><p className="panel-eyebrow">RENTABILIDAD</p><h4>Inversión y ganancia</h4></div>
+          </div>
           {hayFin ? (
             <>
               <div className="fin-kpis">
-                <div className="fin-kpi">
-                  <p className="label">
-                    <i className="punto gris" /> Invertido
-                  </p>
-                  <p className="valor">{fmtCLP(r.invertido)}</p>
-                </div>
-                <div className="fin-kpi">
-                  <p className="label">
-                    <i className="punto verde" /> Ganancia
-                  </p>
-                  <p className={"valor" + (r.ganancia < 0 ? " neg" : " verde")}>{fmtCLP(r.ganancia)}</p>
-                </div>
-                <div className="fin-kpi">
-                  <p className="label">Margen</p>
-                  <p className="valor">{Math.round(r.margenPct)}%</p>
-                </div>
+                <div className="fin-kpi"><p className="label"><i className="punto gris" /> Invertido</p><p className="valor">{fmtCLP(r.invertido)}</p></div>
+                <div className="fin-kpi"><p className="label"><i className="punto verde" /> Ganancia</p><p className={`valor ${r.ganancia < 0 ? "neg" : "verde"}`}>{fmtCLP(r.ganancia)}</p></div>
+                <div className="fin-kpi"><p className="label">Margen</p><p className="valor">{Math.round(r.margenPct)}%</p></div>
               </div>
-              <div className="chart-canvas-box alto">
-                <canvas ref={finBarRef}></canvas>
-              </div>
+              <div className="chart-canvas-box alto"><canvas ref={finBarRef}></canvas></div>
               <p className="fin-nota">
-                Invertido es lo que te costaron los productos que vendiste en estos días; lo invertido más la ganancia da
-                el total vendido.
-                {r.ventasSinCosto > 0 &&
-                  ` No se cuentan ${r.ventasSinCosto} venta${r.ventasSinCosto === 1 ? "" : "s"} con productos sin precio de compra.`}
+                La inversión corresponde al costo de los productos vendidos. {r.ventasSinCosto > 0 && `No se incluyen ${r.ventasSinCosto} venta${r.ventasSinCosto === 1 ? "" : "s"} sin precio de compra registrado.`}
               </p>
             </>
           ) : (
-            <p className="empty">
-              💰 Agrega el precio de compra a tus productos y registra ventas para ver cuánto inviertes y cuánto ganas.
-            </p>
+            <p className="empty">💰 Agrega el precio de compra a tus productos y registra ventas para conocer tu rentabilidad.</p>
           )}
           {inventario.productosConCosto > 0 && inventario.costo > 0 && (
-            <p className="fin-nota">
-              Hoy tienes {fmtCLP(inventario.costo)} en mercadería (a precio de compra). Si la vendes toda, ganarías{" "}
-              {fmtCLP(inventario.gananciaPotencial)}.
-            </p>
+            <p className="fin-nota">Tienes {fmtCLP(inventario.costo)} en mercadería. Si vendes todo el inventario, la ganancia potencial sería {fmtCLP(inventario.gananciaPotencial)}.</p>
           )}
-        </div>
+        </section>
 
-        <div className="chart-wrap">
-          <h4>Productos más vendidos</h4>
+        <section className="chart-wrap">
+          <div className="panel-chart-heading">
+            <div><p className="panel-eyebrow">DESEMPEÑO</p><h4>Productos más vendidos</h4></div>
+            <span className="panel-chart-caption">Unidades</span>
+          </div>
           <div className="chart-canvas-box">
             {top.length === 0 ? <p className="empty">Sin ventas en este período.</p> : <canvas ref={topBarRef}></canvas>}
           </div>
-        </div>
+        </section>
 
-        <div className="card">
-          <h4 style={{ margin: "0 0 8px", fontSize: 13.5, display: "flex", alignItems: "center", gap: 6 }}>
-            <IconAlert /> Alertas de stock bajo
-          </h4>
-          {bajo.length === 0 && <p className="empty">Todo tu inventario está en buen nivel.</p>}
-          {bajo.map((p) => (
-            <div className="alert-row" key={p.productoId}>
-              <span className="dot"></span>
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: 13.5, fontWeight: 600 }}>{p.nombre}</p>
-                <p style={{ margin: 0, fontSize: 11.5, color: "var(--ink-soft)" }}>
-                  Quedan {p.stock} unidades (mínimo {p.stockMinimo})
-                </p>
+        <section className="chart-wrap panel-actividad">
+          <div className="panel-chart-heading">
+            <div><p className="panel-eyebrow">ÚLTIMOS MOVIMIENTOS</p><h4>Ventas recientes</h4></div>
+          </div>
+          {ventasRecientes.length === 0 ? (
+            <p className="empty">Todavía no hay ventas registradas.</p>
+          ) : (
+            ventasRecientes.map((venta) => (
+              <div className="panel-venta-row" key={venta.id}>
+                <div className="panel-venta-icon">↗</div>
+                <div className="panel-venta-info">
+                  <strong>Venta #{venta.id}</strong>
+                  <span>{fechaLegible(venta.fecha)} · {(venta.items || []).length} producto(s)</span>
+                </div>
+                <strong className="panel-venta-total">{fmtCLP(venta.total)}</strong>
               </div>
-            </div>
-          ))}
-        </div>
+            ))
+          )}
+        </section>
+
+        <section className="chart-wrap panel-stock">
+          <div className="panel-chart-heading">
+            <div><p className="panel-eyebrow">CONTROL DE INVENTARIO</p><h4><IconAlert /> Alertas de stock bajo</h4></div>
+            <span className={`panel-stock-count ${bajo.length ? "hay-alertas" : ""}`}>{bajo.length}</span>
+          </div>
+          {bajo.length === 0 ? (
+            <p className="empty">✓ Todo tu inventario está en buen nivel.</p>
+          ) : (
+            bajo.map((producto) => (
+              <div className="alert-row" key={producto.productoId}>
+                <span className="dot"></span>
+                <div className="panel-stock-info">
+                  <strong>{producto.nombre}</strong>
+                  <span>Quedan {producto.stock} unidades · mínimo {producto.stockMinimo}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </section>
       </>
     );
   }
 
   return (
-    <div>
-      <h2 className="screen-title">Panel de ventas</h2>
-      <p className="screen-sub">Así se ha movido tu negocio.</p>
-
-      <div className="tabs-toggle">
-        {[7, 14, 30].map((n) => (
-          <button key={n} className={rango === n ? "active" : ""} onClick={() => setRango(n)}>
-            Últimos {n} días
-          </button>
-        ))}
-      </div>
-
+    <div className="panel-page">
+      <header className="panel-hero">
+        <div className="panel-hero-top">
+          <span className="panel-hero-kicker">VENDIX · TU NEGOCIO</span>
+          <span className="panel-live"><i /> Datos actualizados</span>
+        </div>
+        <h2>Resumen del negocio</h2>
+        <p>Una mirada clara a tus ventas, ganancias e inventario.</p>
+      </header>
       {cuerpo}
     </div>
   );

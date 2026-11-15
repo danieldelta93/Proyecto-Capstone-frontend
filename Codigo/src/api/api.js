@@ -53,6 +53,9 @@ export const api = {
   masVendidos: (dias, limite = 5) => peticion("GET", `/estadisticas/productos-mas-vendidos${consulta({ dias, limite })}`),
   stockBajo: () => peticion("GET", "/estadisticas/stock-bajo"),
   valorInventario: () => peticion("GET", "/estadisticas/valor-inventario"),
+   // ---- Vendix Insights
+  obtenerInsights: () => peticion("GET", "/insights"),
+  actualizarInsights: () => peticion("POST", "/insights/actualizar"),
 
   // ---- asistente
   preguntar: (pregunta) => peticion("POST", "/asistente/preguntar", { pregunta }),

@@ -1,45 +1,69 @@
 import { useEffect, useState } from "react";
 
-// Escucha el evento que dispara Chrome/Edge/Android cuando la app
-// cumple los requisitos para instalarse (manifest + service worker +
-// servida por HTTPS), y expone una función para mostrar ese diálogo
-// nativo bajo demanda (por ejemplo, desde un botón "Instalar app").
-//
-// En iOS Safari no existe este evento: ahí la instalación es manual
-// (compartir → Agregar a pantalla de inicio), así que el botón
-// simplemente no aparece y hay que indicarlo en la interfaz si se
-// quiere guiar a esos usuarios.
+// Captura el evento desde que se carga el módulo, antes de que React monte
+// el Header. Así no se pierde beforeinstallprompt si Chrome lo dispara pronto.
+let deferredPrompt = null;
+const subscribers = new Set();
+
+const notify = () => {
+  subscribers.forEach((callback) => callback(deferredPrompt));
+};
+
+if (typeof window !== "undefined" && !window.__vendixInstallPromptReady) {
+  window.__vendixInstallPromptReady = true;
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    notify();
+  });
+
+  window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+    notify();
+  });
+}
+
 export function useInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [installed, setInstalled] = useState(
-    () =>
+  const [promptEvent, setPromptEvent] = useState(deferredPrompt);
+  const [installed, setInstalled] = useState(() =>
+    typeof window !== "undefined" && (
       window.matchMedia?.("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
+    )
   );
 
   useEffect(() => {
-    const onBeforeInstall = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    const updatePrompt = (event) => setPromptEvent(event);
+    subscribers.add(updatePrompt);
+    setPromptEvent(deferredPrompt);
+
+    const displayMode = window.matchMedia?.("(display-mode: standalone)");
+    const onDisplayModeChange = (event) => {
+      if (event.matches) setInstalled(true);
     };
-    const onInstalled = () => {
-      setInstalled(true);
-      setDeferredPrompt(null);
-    };
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
+    displayMode?.addEventListener?.("change", onDisplayModeChange);
+
     return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
+      subscribers.delete(updatePrompt);
+      displayMode?.removeEventListener?.("change", onDisplayModeChange);
     };
   }, []);
 
   const promptInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
+    if (!promptEvent) return;
+
+    promptEvent.prompt();
+    const choice = await promptEvent.userChoice;
+    if (choice?.outcome === "accepted") setInstalled(true);
+    deferredPrompt = null;
+    setPromptEvent(null);
+    notify();
   };
 
-  return { canInstall: !!deferredPrompt && !installed, promptInstall, installed };
+  return {
+    canInstall: Boolean(promptEvent) && !installed,
+    promptInstall,
+    installed,
+  };
 }

@@ -1,10 +1,11 @@
-import { IconBox, IconCoin, IconChart, IconChat, IconDoc } from "../Icons/Icons.jsx";
+import { IconBox, IconCoin, IconChart, IconChat, IconDoc, IconAlert } from "../Icons/Icons.jsx";
 import "./TabBar.css";
 
 const TABS = [
   { id: "inventario", label: "Inventario", Icon: IconBox },
   { id: "ventas", label: "Ventas", Icon: IconCoin },
   { id: "panel", label: "Panel", Icon: IconChart },
+  { id: "consejos", label: "Consejos", Icon: IconAlert },
   { id: "asistente", label: "Asistente", Icon: IconChat },
   { id: "reportes", label: "Reportes", Icon: IconDoc },
 ];

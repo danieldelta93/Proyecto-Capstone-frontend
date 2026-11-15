@@ -5,13 +5,14 @@ import { IconDownload, IconLogout } from "../Icons/Icons.jsx";
 import "./Header.css";
 
 const isIOS = () =>
-  /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
 export default function Header({ user, onLogout, ventasHoy, stockBajoCount }) {
   const { canInstall, promptInstall, installed } = useInstallPrompt();
-  const [dismissedIOSHint, setDismissedIOSHint] = useState(false);
+  const [showIOSHint, setShowIOSHint] = useState(false);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
-  const showIOSHint = isIOS() && !installed && !dismissedIOSHint;
+  const iosNeedsHelp = isIOS() && !installed;
 
   const fechaLarga = new Date().toLocaleDateString("es-CL", {
     weekday: "long",
@@ -31,8 +32,25 @@ export default function Header({ user, onLogout, ventasHoy, stockBajoCount }) {
         </div>
         <div className="header-actions">
           {canInstall && (
-            <button className="header-btn" onClick={promptInstall} title="Instalar Vendix">
+            <button
+              className="header-btn install-btn"
+              onClick={promptInstall}
+              title="Instalar Vendix"
+              aria-label="Instalar Vendix"
+            >
               <IconDownload size={15} />
+              <span>Instalar Vendix</span>
+            </button>
+          )}
+          {iosNeedsHelp && (
+            <button
+              className="header-btn install-btn"
+              onClick={() => setShowIOSHint((visible) => !visible)}
+              aria-expanded={showIOSHint}
+              aria-label="Cómo instalar Vendix"
+            >
+              <IconDownload size={15} />
+              <span>Cómo instalar</span>
             </button>
           )}
           {confirmingLogout ? (
@@ -40,20 +58,21 @@ export default function Header({ user, onLogout, ventasHoy, stockBajoCount }) {
               ¿Salir?
             </button>
           ) : (
-            <button className="header-btn" onClick={() => setConfirmingLogout(true)} title="Cerrar sesión">
+            <button className="header-btn logout-btn" onClick={() => setConfirmingLogout(true)} title="Cerrar sesión" aria-label="Cerrar sesión">
               <IconLogout size={15} />
             </button>
           )}
         </div>
       </div>
 
-      {showIOSHint && (
-        <div className="ios-hint">
+      {iosNeedsHelp && showIOSHint && (
+        <div className="ios-hint" role="status">
           <span>
-            Para instalarla: toca <strong>Compartir</strong> y luego{" "}
-            <strong>Agregar a inicio</strong>.
+            Para instalar Vendix en tu iPhone: toca <strong>Compartir</strong> en Safari,
+            luego <strong>Agregar a pantalla de inicio</strong> y confirma con <strong>Agregar</strong>.
+
           </span>
-          <button onClick={() => setDismissedIOSHint(true)} aria-label="Cerrar aviso">
+          <button onClick={() => setShowIOSHint(false)} aria-label="Cerrar instrucciones">
             ✕
           </button>
         </div>

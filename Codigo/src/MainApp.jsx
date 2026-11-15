@@ -5,6 +5,7 @@ import Toast from "./components/Toast/Toast.jsx";
 import Inventario from "./components/Inventario/Inventario.jsx";
 import Ventas from "./components/Ventas/Ventas.jsx";
 import Panel from "./components/Panel/Panel.jsx";
+import Consejos from "./components/Consejos/Consejos.jsx";
 import Asistente from "./components/Asistente/Asistente.jsx";
 import Reportes from "./components/Reportes/Reportes.jsx";
 import { api } from "./api/api.js";
@@ -15,7 +16,7 @@ import "./MainApp.css";
 export default function MainApp({ user, onLogout }) {
   const [productos, setProductos] = useState([]);
   const [ventas, setVentas] = useState([]);
-  const [estado, setEstado] = useState("cargando"); // "cargando" | "listo" | "error"
+  const [estado, setEstado] = useState("cargando");
   const [errorCarga, setErrorCarga] = useState("");
   const [tab, setTab] = useState("inventario");
   const { toast, showToast } = useToast();
@@ -40,8 +41,6 @@ export default function MainApp({ user, onLogout }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Ejecuta una acción contra la API; si falla, muestra el mensaje del servidor
-  // (por ejemplo "Stock insuficiente de Gorro: quedan 2 y se necesitan 5").
   const intentar = async (accion, alFallar) => {
     try {
       return await accion();
@@ -80,7 +79,6 @@ export default function MainApp({ user, onLogout }) {
       showToast("Producto eliminado 🗑️");
     });
 
-  // Si no alcanzó el stock (por ejemplo, otra persona vendió antes), se actualiza la pantalla con el stock real.
   const refrescarSiSinStock = (e) => {
     if (e.codigo === "STOCK_INSUFICIENTE") Promise.all([cargarProductos(), cargarVentas()]).catch(() => {});
   };
@@ -88,7 +86,7 @@ export default function MainApp({ user, onLogout }) {
   const registrarVenta = (items, metodo) =>
     intentar(async () => {
       const venta = await api.crearVenta({ items, metodo });
-      await Promise.all([cargarProductos(), cargarVentas()]); // el stock cambió
+      await Promise.all([cargarProductos(), cargarVentas()]);
       showToast(
         `¡Venta registrada! 🎉 Sumaste ${fmtCLP(venta.total)}` +
           (venta.ganancia !== null ? ` (ganancia ${fmtCLP(venta.ganancia)})` : "")
@@ -99,7 +97,7 @@ export default function MainApp({ user, onLogout }) {
   const anularVenta = (id) =>
     intentar(async () => {
       await api.anularVenta(id);
-      await Promise.all([cargarProductos(), cargarVentas()]); // el stock volvió al inventario
+      await Promise.all([cargarProductos(), cargarVentas()]);
       showToast("Venta anulada, el stock volvió al inventario ↩️");
     });
 
@@ -110,24 +108,19 @@ export default function MainApp({ user, onLogout }) {
     contenido = (
       <div className="card" style={{ textAlign: "center" }}>
         <p className="empty">😕 {errorCarga}</p>
-        <button className="btn btn-primary" onClick={cargarTodo}>
-          Reintentar
-        </button>
+        <button className="btn btn-primary" onClick={cargarTodo}>Reintentar</button>
       </div>
     );
   } else {
     const screens = {
-      inventario: (
-        <Inventario productos={productos} onSave={guardarProducto} onDelete={eliminarProducto} />
-      ),
-      ventas: (
-        <Ventas productos={productos} ventas={ventas} onRegistrarVenta={registrarVenta} onAnularVenta={anularVenta} />
-      ),
+      inventario: <Inventario productos={productos} onSave={guardarProducto} onDelete={eliminarProducto} />,
+      ventas: <Ventas productos={productos} ventas={ventas} onRegistrarVenta={registrarVenta} onAnularVenta={anularVenta} />,
       panel: <Panel productos={productos} ventas={ventas} />,
+      consejos: <Consejos productos={productos} ventas={ventas} />,
       asistente: <Asistente />,
       reportes: <Reportes productos={productos} ventas={ventas} />,
     };
-    contenido = screens[tab];
+    contenido = screens[tab] || screens.inventario;
   }
 
   return (

@@ -1,0 +1,45 @@
+.consejos-page { display:flex; flex-direction:column; gap:20px; padding-bottom:12px; }
+.consejos-hero { position:relative; overflow:hidden; padding:24px 20px; border-radius:22px; color:#fff; background:linear-gradient(135deg,#173f35 0%,#28785d 58%,#3b9871 100%); box-shadow:0 12px 28px rgba(28,91,67,.16); }
+.consejos-hero::after { content:""; position:absolute; width:190px; height:190px; right:-65px; top:-80px; border:1px solid rgba(255,255,255,.15); border-radius:50%; box-shadow:0 0 0 24px rgba(255,255,255,.045),0 0 0 48px rgba(255,255,255,.035); }
+.consejos-hero-icon { display:grid; place-items:center; width:42px; height:42px; margin-bottom:18px; border-radius:14px; background:rgba(255,255,255,.15); font-size:25px; }
+.consejos-eyebrow { margin:0 0 7px; font-size:10px; font-weight:800; letter-spacing:1.35px; opacity:.75; }
+.consejos-hero h2 { position:relative; z-index:1; margin:0 0 8px; font-size:25px; line-height:1.2; }
+.consejos-hero > p:not(.consejos-eyebrow) { position:relative; z-index:1; max-width:340px; margin:0; color:rgba(255,255,255,.86); font-size:13px; line-height:1.55; }
+.consejos-refresh { position:relative; z-index:1; display:inline-flex; align-items:center; gap:8px; margin-top:19px; padding:10px 14px; border:0; border-radius:11px; background:#fff; color:#205b45; font:700 12px inherit; cursor:pointer; }
+.consejos-refresh:disabled { opacity:.65; cursor:wait; }
+.consejos-refresh span { font-size:18px; line-height:12px; }
+.consejos-resumen { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.consejo-resumen-card { display:flex; min-width:0; flex-direction:column; align-items:flex-start; gap:5px; padding:13px 11px; border:1px solid var(--line); border-radius:15px; background:var(--surface); }
+.consejo-resumen-icon { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; font-weight:800; }
+.consejo-resumen-icon.oportunidad { background:#fff4d9; color:#9a6a12; }
+.consejo-resumen-icon.recomendacion { background:#e6f4eb; color:#28764e; }
+.consejo-resumen-icon.alerta { background:#ffeded; color:#b44b43; }
+.consejo-resumen-numero { font-size:23px; font-weight:800; color:var(--ink); line-height:1.1; }
+.consejo-resumen-label { color:var(--ink-soft); font-size:10px; font-weight:650; }
+.consejos-listado { display:flex; flex-direction:column; gap:13px; }
+.consejos-listado-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:10px; }
+.consejos-listado-heading .consejos-eyebrow { color:var(--primary); }
+.consejos-listado-heading h3 { margin:0; color:var(--ink); font-size:19px; }
+.consejos-fecha { color:var(--ink-soft); font-size:10px; text-align:right; }
+.consejos-estado,.consejos-vacio { padding:22px 15px; border:1px dashed var(--line); border-radius:16px; color:var(--ink-soft); text-align:center; font-size:13px; }
+.consejos-vacio span { display:block; color:var(--primary); font-size:28px; }
+.consejos-vacio h3 { margin:8px 0 5px; color:var(--ink); font-size:15px; }
+.consejos-vacio p { margin:0; line-height:1.5; }
+.consejos-error { display:flex; align-items:center; gap:9px; padding:12px; border-radius:12px; background:#fff0ef; color:#9e3e37; font-size:12px; }
+.consejos-cards { display:flex; flex-direction:column; gap:12px; }
+.consejo-card { padding:17px; border:1px solid var(--line); border-left:4px solid var(--primary); border-radius:16px; background:var(--surface); box-shadow:0 4px 14px rgba(20,35,28,.035); }
+.consejo-card.tipo-alerta { border-left-color:#d36b54; }
+.consejo-card.tipo-oportunidad { border-left-color:#d5a23e; }
+.consejo-card.tipo-recomendacion { border-left-color:#398c68; }
+.consejo-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.consejo-etiqueta { display:inline-flex; padding:5px 9px; border-radius:20px; background:#e9f2ed; color:#28664b; font-size:10px; font-weight:750; }
+.consejo-etiqueta.tipo-alerta { background:#fff0ed; color:#a64b3d; }
+.consejo-etiqueta.tipo-oportunidad { background:#fff6df; color:#8b641c; }
+.consejo-etiqueta.tipo-resumen { background:#edf0fa; color:#52628c; }
+.consejo-prioridad { color:var(--ink-soft); font-size:10px; text-transform:capitalize; }
+.consejo-card h3 { margin:12px 0 7px; color:var(--ink); font-size:16px; line-height:1.3; }
+.consejo-descripcion { margin:0; color:var(--ink-soft); font-size:13px; line-height:1.55; overflow-wrap:anywhere; }
+.consejo-accion { margin-top:14px; padding:12px; border-radius:11px; background:var(--surface-alt); }
+.consejo-accion strong { color:var(--ink); font-size:11px; }
+.consejo-accion p { margin:4px 0 0; color:var(--ink-soft); font-size:12px; line-height:1.5; }
+@media (min-width:520px) { .consejos-page { gap:22px; } .consejos-hero { padding:28px 24px; } .consejos-resumen { gap:12px; } .consejo-resumen-card { padding:15px; } }

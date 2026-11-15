@@ -1,3 +1,29 @@
-.report-card h3{margin:0 0 4px; font-size:15px;}
-.report-card p{margin:0 0 12px; font-size:13px; color:var(--ink-soft);}
-.report-actions{display:flex; gap:8px;}
+.report-card h3{margin:0 0 4px;font-size:15px}
+.report-card p{margin:0 0 12px;font-size:13px;color:var(--ink-soft)}
+.report-actions{display:flex;gap:8px;flex-wrap:wrap}
+.report-note{background:var(--surface-alt);border:0}
+.report-note p{margin:0;font-size:12.5px;color:var(--ink-soft)}
+#reporte-impresion{display:none}
+@media print{
+  @page{size:A4 landscape;margin:14mm}
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  body *{visibility:hidden!important}
+  #reporte-impresion,#reporte-impresion *{visibility:visible!important}
+  #reporte-impresion{display:block!important;position:absolute;inset:0;width:100%;color:#202923;background:#fff;font-family:Arial,sans-serif;font-size:10px}
+  .pdf-header{border-bottom:2px solid #173f35;padding-bottom:12px;margin-bottom:18px}
+  .pdf-header>div{display:flex;justify-content:space-between;align-items:center;color:#173f35}
+  .pdf-header>div strong{font-size:20px;letter-spacing:2px}
+  .pdf-header>div span,.pdf-header p{color:#64736c}
+  .pdf-header h1{font-size:22px;margin:16px 0 4px;text-transform:capitalize}
+  .pdf-header p{margin:0}
+  .pdf-summary{display:flex;gap:12px;margin:16px 0}
+  .pdf-summary>div{flex:1;border:1px solid #dce5e1;border-radius:6px;padding:10px}
+  .pdf-summary b,.pdf-summary span{display:block}
+  .pdf-summary b{font-size:16px;color:#173f35;margin-bottom:4px}
+  .pdf-summary span{color:#64736c}
+  .pdf-table{width:100%;border-collapse:collapse;table-layout:auto}
+  .pdf-table th{background:#173f35!important;color:#fff!important;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pdf-table th,.pdf-table td{padding:7px;border:1px solid #dce5e1;vertical-align:top;overflow-wrap:anywhere}
+  .pdf-table tr{break-inside:avoid}
+  .pdf-footer{margin-top:18px;padding-top:8px;border-top:1px solid #dce5e1;color:#64736c;text-align:right}
+}
